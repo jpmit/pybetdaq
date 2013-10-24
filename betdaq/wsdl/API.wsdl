@@ -1,0 +1,2391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns="http://www.GlobalBettingExchange.com/ExternalAPI/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" targetNamespace="http://www.GlobalBettingExchange.com/ExternalAPI/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xs:schema elementFormDefault="qualified" targetNamespace="http://www.GlobalBettingExchange.com/ExternalAPI/">
+      <!-- Types START -->
+      <xs:complexType name="ReturnStatus">
+        <xs:attribute name="Code" type="xs:int" use="required"/>
+        <xs:attribute name="Description" type="xs:string" use="required"/>
+        <xs:attribute name="CallId" type="xs:string" use="required"/>
+        <xs:attribute name="ExtraInformation" type="xs:string" use="optional"/>
+      </xs:complexType>
+      <xs:complexType name="GetAccountBalancesResponse">
+        <xs:annotation>
+          <xs:documentation>Complex type containing basic account information such as Balance, Exposure and Available funds</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:attribute name="Currency" type="xs:string" use="required"/>
+            <xs:attribute name="Balance" type="xs:decimal" use="required"/>
+            <xs:attribute name="Exposure" type="xs:decimal" use="required"/>
+            <xs:attribute name="AvailableFunds" type="xs:decimal" use="required"/>
+            <xs:attribute name="Credit" type="xs:decimal" use="required"/>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="ListSelectionsChangedSinceRequest">
+        <xs:attribute name="SelectionSequenceNumber" type="xs:long" use="required"/>
+      </xs:complexType>
+      <xs:complexType name="ListSelectionsChangedSinceResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+              <xs:element name="Selections" type="ListSelectionsChangedSinceResponseItem"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="ListSelectionsChangedSinceResponseItem">
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="SettlementInformation" type="SettlementInformationType"/>
+        </xs:sequence>
+        <xs:attribute name="Id" type="xs:long" use="required"/>
+        <xs:attribute name="Name" type="xs:string" use="required"/>
+        <xs:attribute name="DisplayOrder" type="xs:int" use="required"/>
+        <xs:attribute name="IsHidden" type="xs:boolean" use="required"/>
+        <xs:attribute name="Status" type="xs:short" use="required"/>
+        <xs:attribute name="ResetCount" type="xs:short" use="required"/>
+        <xs:attribute name="WithdrawalFactor" type="xs:decimal" use="required"/>
+        <xs:attribute name="MarketId" type="xs:long" use="required"/>
+        <xs:attribute name="SelectionSequenceNumber" type="xs:long" use="required"/>
+        <xs:attribute name="CancelOrdersTime" type="xs:dateTime" use="optional"/>
+      </xs:complexType>
+      <xs:complexType name="SettlementInformationType">
+        <xs:attribute name="SettledTime" type="xs:dateTime" use="required"/>
+        <xs:attribute name="VoidPercentage" type="xs:decimal" use="required"/>
+        <xs:attribute name="LeftSideFactor" type="xs:decimal" use="required"/>
+        <xs:attribute name="RightSideFactor" type="xs:decimal" use="required"/>
+        <xs:attribute name="SettlementResultString" type="xs:string" use="required"/>
+      </xs:complexType>
+      <xs:complexType name="ListBootstrapOrdersRequest">
+        <xs:sequence minOccurs="1" maxOccurs="1">
+          <xs:element name="SequenceNumber" type="xs:long" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="wantSettledOrdersOnUnsettledMarkets" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ListBootstrapOrdersResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence>
+              <xs:element name="Orders">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Order" type="Order" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="MaximumSequenceNumber" type="xs:long" use="required"/>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <!-- -->
+      <xs:complexType name="Order">
+        <xs:annotation>
+          <xs:documentation>A type representing an Order</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="OrderCommissionInformation" type="OrderCommissionInformationType" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="Id" type="xs:long" use="required"/>
+        <xs:attribute name="MarketId" type="xs:long" use="required"/>
+        <xs:attribute name="SelectionId" type="xs:long" use="required"/>
+        <xs:attribute name="SequenceNumber" type="xs:long" use="required"/>
+        <xs:attribute name="IssuedAt" type="xs:dateTime" use="required"/>
+        <xs:attribute name="Polarity" type="xs:unsignedByte" use="required"/>
+        <xs:attribute name="UnmatchedStake" type="xs:decimal" use="required"/>
+        <xs:attribute name="RequestedPrice" type="xs:decimal" use="required"/>
+        <xs:attribute name="MatchedPrice" type="xs:decimal"/>
+        <xs:attribute name="MatchedStake" type="xs:decimal"/>
+        <xs:attribute name="TotalForSideMakeStake" type="xs:decimal" use="required"/>
+        <xs:attribute name="TotalForSideTakeStake" type="xs:decimal" use="required"/>
+        <xs:attribute name="MatchedAgainstStake" type="xs:decimal"/>
+        <xs:attribute name="Status" type="xs:unsignedByte"/>
+        <xs:attribute name="RestrictOrderToBroker" type="xs:boolean"/>
+        <xs:attribute name="PunterReferenceNumber" type="xs:long"/>
+        <xs:attribute name="CancelOnInRunning" type="xs:boolean" use="required"/>
+        <xs:attribute name="CancelIfSelectionReset" type="xs:boolean" use="required"/>
+        <xs:attribute name="IsCurrentlyInRunning" type="xs:boolean" use="required"/>
+        <xs:attribute name="PunterCommissionBasis" type="xs:unsignedByte" use="required"/>
+        <xs:attribute name="MakeCommissionRate" type="xs:decimal" use="required"/>
+        <xs:attribute name="TakeCommissionRate" type="xs:decimal" use="required"/>
+      </xs:complexType>
+      <xs:complexType name="OrderCommissionInformationType">
+        <xs:attribute name="GrossSettlementAmount" type="xs:decimal" use="required"/>
+        <xs:attribute name="OrderCommission" type="xs:decimal" use="optional"/>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfOrder">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="Order" nillable="true" type="Order"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="SimpleOrderRequest">
+        <xs:annotation>
+          <xs:documentation>A type representing an Order Request with no receipt</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="SelectionId" type="xs:long" use="required"/>
+        <xs:attribute name="Stake" type="xs:decimal" use="required"/>
+        <xs:attribute name="Price" type="xs:decimal" use="required"/>
+        <xs:attribute name="Polarity" type="xs:unsignedByte" use="required"/>
+        <xs:attribute name="ExpectedSelectionResetCount" type="xs:unsignedByte" use="required">
+          <xs:annotation>
+            <xs:documentation>This value must be set to the SelectionResetCount value that is in the Selection object that is returned by GetMarketInformation and GetPrices.  The purpose of this is to ensure that you are aware of the state of the market before placing a bet.  If the ExpectedSelectionResetCount that you submit to the server is not the same as the SelectionResetCount that is on the server, then your bet will NOT be accepted, and you will get an error.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="ExpectedWithdrawalSequenceNumber" type="xs:unsignedByte" use="required">
+          <xs:annotation>
+            <xs:documentation>This value should be set to the withdrawalSequenceNumber value that is in the Market object that is returned by GetMarketInformation and GetPrices.  The purpose of this is to ensure that you are aware of the state of the market before placing a bet.  If the expectedWithdrawalSequenceNumbert that you submit to the server is not the same as the withdrawalSequenceNumber that is on the server, then your bet WILL be accepted, but it will be repriced to allow for the fact that there are more or less selections available on the market than you believed.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="CancelOnInRunning" type="xs:boolean" use="required">
+          <xs:annotation>
+            <xs:documentation>The effect of this option when set to true is to cancel any unmatched orders when the market changes to an in-running market.  This option only applies while the market is NOT in-running.  When the market turns in-running, this option will have no effect.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="CancelIfSelectionReset" type="xs:boolean" use="required">
+          <xs:annotation>
+            <xs:documentation>The effect of this option is to cancel any unmatched bets if the selection is reset.  This can occur when the Market is reset (eg a goal is scored in an in-running market).  This defaults to true - unmatched bets will be cancelled if an event occurs in the market such that Betdaq forces the market to be reset</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="ExpiresAt" type="xs:dateTime" use="optional">
+          <xs:annotation>
+            <xs:documentation>An expires at value set in the past will cause the bet to be cancelled - although  the bet status will not immediately be set to Cancelled (this will occur in several moments on the exchange), the bet will not be available for matching.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="WithdrawalRepriceOption" type="xs:unsignedByte" use="optional">
+          <xs:annotation>
+            <xs:documentation>Reprice(1), Cancel(2), DontReprice(3)</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="KillType" type="xs:unsignedByte" use="optional"/>
+        <xs:attribute name="FillOrKillThreshold" type="xs:decimal" use="optional">
+          <xs:annotation>
+            <xs:documentation>This field is required only if killType is set to FillOrKill or FillOrKillDontCancel.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="RestrictOrderToBroker" type="xs:boolean" use="optional">
+          <xs:annotation>
+            <xs:documentation>Deprecated - This field is required only if killType is set to FillOrKillDontCancel.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="ChannelTypeInfo" type="xs:string" use="optional">
+          <xs:annotation>
+            <xs:documentation>For internal use only</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="PunterReferenceNumber" type="xs:long"/>
+      </xs:complexType>
+      <xs:complexType name="Offer">
+        <xs:annotation>
+          <xs:documentation>A offer is an price, stake tuple used in the For and Against side price lists that are within a selection.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element name="Stake" type="xs:decimal">
+            <xs:annotation>
+              <xs:documentation>The amount available for this price.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="Price">
+            <xs:annotation>
+              <xs:documentation>The decimal odds for this price</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+              <xs:restriction base="xs:decimal">
+                <xs:minInclusive value="1.01"/>
+                <xs:maxInclusive value="1000"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:element>
+
+        </xs:sequence>
+      </xs:complexType>
+      <!-- Web Service Objects -->
+      <xs:complexType name="BaseResponse" abstract="true">
+        <xs:sequence>
+          <xs:element name="ReturnStatus" type="ReturnStatus"/>
+          <xs:element name="Timestamp" type="xs:dateTime" minOccurs="1"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ListOrdersChangedSinceRequest">
+        <xs:sequence minOccurs="1" maxOccurs="1">
+          <xs:element name="SequenceNumber" type="xs:long" minOccurs="1" maxOccurs="1"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ListOrdersChangedSinceResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence>
+              <xs:element name="Orders">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Order" type="Order" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="PlaceOrdersNoReceiptRequest">
+        <xs:sequence>
+          <xs:element name="Orders">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Order" type="SimpleOrderRequest" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="WantAllOrNothingBehaviour" type="xs:boolean"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="PlaceOrdersNoReceiptResponseItem">
+        <xs:attribute name="OrderHandle" type="xs:long" use="optional"/>
+        <xs:attribute name="ReturnCode" type="xs:int" use="required"/>
+        <xs:attribute name="PunterReferenceNumber" type="xs:long" use="required"/>
+      </xs:complexType>
+      <xs:complexType name="PlaceOrdersNoReceiptResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence>
+              <xs:element name="OrderHandles">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="OrderHandle" type="xs:long" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Orders">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Order" type="PlaceOrdersNoReceiptResponseItem" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="PlaceOrdersWithReceiptRequest">
+        <xs:sequence>
+          <xs:element name="Orders">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Order" type="PlaceOrdersWithReceiptRequestItem" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="PlaceOrdersWithReceiptResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence>
+              <xs:element name="Orders">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Order" type="PlaceOrdersWithReceiptResponseItem" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="CancelOrdersResponseItem">
+        <xs:attribute name="OrderHandle" type="xs:long"/>
+        <xs:attribute name="cancelledForSideStake" type="xs:decimal"/>
+        <xs:attribute name="PunterReferenceNumber" type="xs:long" use="required"/>
+      </xs:complexType>
+      <xs:complexType name="CancelOrdersRequest">
+        <xs:sequence>
+          <xs:sequence minOccurs="1" maxOccurs="unbounded">
+            <xs:element name="OrderHandle" type="xs:long"/>
+          </xs:sequence>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="CancelOrdersResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence>
+              <xs:element name="CancelledOrdersHandles">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="OrderHandle" type="xs:long" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Orders">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Order" type="CancelOrdersResponseItem" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="CancelAllOrdersRequest">
+        <xs:sequence/>
+      </xs:complexType>
+      <xs:complexType name="CancelAllOrdersResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence>
+              <xs:element name="CancelledOrdersHandles">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="OrderHandle" type="xs:long" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="Orders">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Order" type="CancelAllOrdersResponseItem" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <!-- End Of Web Service Objects -->
+      <xs:simpleType name="PolarityEnum">
+        <xs:annotation>
+          <xs:documentation>Enumeration of valid Order polarities</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="For"/>
+          <xs:enumeration value="Against"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="PlaceOrdersWithReceiptResponseItem">
+        <xs:attribute name="Status" type="xs:unsignedByte"/>
+        <xs:attribute name="MatchedAgainstStake" type="xs:decimal"/>
+        <xs:attribute name="MatchedStake" type="xs:decimal"/>
+        <xs:attribute name="MatchedPrice" type="xs:decimal"/>
+        <xs:attribute name="UnmatchedStake" type="xs:decimal"/>
+        <xs:attribute name="Polarity" type="xs:unsignedByte"/>
+        <xs:attribute name="IssuedAt" type="xs:dateTime"/>
+        <xs:attribute name="SequenceNumber" type="xs:long"/>
+        <xs:attribute name="SelectionId" type="xs:long">
+          <xs:annotation>
+            <xs:documentation>Deprecated attribute.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="PunterReferenceNumber" type="xs:long"/>
+        <xs:attribute name="OrderHandle" type="xs:long"/>
+      </xs:complexType>
+      <xs:complexType name="PlaceOrdersWithReceiptRequestItem">
+        <xs:annotation>
+          <xs:documentation>A type representing an Order Request with receipt</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="SelectionId" type="xs:long" use="required"/>
+        <xs:attribute name="Stake" type="xs:decimal" use="required"/>
+        <xs:attribute name="Price" type="xs:decimal" use="required"/>
+        <xs:attribute name="Polarity" type="xs:unsignedByte" use="required"/>
+        <xs:attribute name="ExpectedSelectionResetCount" type="xs:unsignedByte" use="required">
+          <xs:annotation>
+            <xs:documentation>This value must be set to the selectionResetCount value that is in the Selection object that is returned by GetMarketInformation and GetPrices.  The purpose of this is to ensure that you are aware of the state of the market before placing a bet.  If the expectedSelectionResetCount that you submit to the server is not the same as the selectionResetCount that is on the server, then your bet will NOT be accepted, and you will get a 300 error.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="ExpectedWithdrawalSequenceNumber" type="xs:unsignedByte" use="required">
+          <xs:annotation>
+            <xs:documentation>This value should be set to the withdrawalSequenceNumber value that is in the Market object that is returned by GetMarketInformation and GetPrices.  The purpose of this is to ensure that you are aware of the state of the market before placing a bet.  If the expectedWithdrawalSequenceNumbert that you submit to the server is not the same as the withdrawalSequenceNumber that is on the server, then your bet WILL be accepted, but it will be repriced to allow for the fact that there are more or less selections available on the market than you believed.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="KillType" type="xs:unsignedByte" use="required">
+          <xs:annotation>
+            <xs:documentation>FillAndKill=2, FillOrKill=3, FillOrKillDontCancel=4</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="FillOrKillThreshold" type="xs:decimal" use="optional">
+          <xs:annotation>
+            <xs:documentation>This field is required only if killType is set to FillOrKill or FillOrKillDontCancel.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="CancelOnInRunning" type="xs:boolean" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              The effect of this option when set to true is to cancel any unmatched bets when the market changes to an in-running market.  This option only applies while the market is NOT in-running.  When the market turns in-running, this option will have no effect.
+              This field is required only if killType is set to FillOrKillDontCancel.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="CancelIfSelectionReset" type="xs:boolean" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              The effect of this option is to cancel any unmatched bets if the selection is reset.  This can occur when the Market is reset (eg a goal is scored in an in-running market).  This defaults to true - unmatched bets will be cancelled if an event occurs in the market such that Betdaq forces the market to be reset
+              This field is required only if killType is set to FillOrKillDontCancel.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="WithdrawalRepriceOption" type="xs:unsignedByte" use="optional">
+          <xs:annotation>
+            <xs:documentation>This field is required only if killType is set to FillOrKillDontCancel. Reprice(1), Cancel(2), DontReprice(3)</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="ExpiresAt" type="xs:dateTime" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              An expires at value set in the past will cause the bet to be cancelled - although the bet status will not immediately be set to Cancelled (this will occur in several moments on the exchange), the bet will not be available for matching.
+              This field is optional if killType is set to FillOrKillDontCancel, otherwise not needed at all.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="RestrictOrderToBroker" type="xs:boolean" use="optional">
+          <xs:annotation>
+            <xs:documentation>Deprecated - This field is required only if killType is set to FillOrKillDontCancel.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="ChannelTypeInfo" type="xs:string" use="optional">
+          <xs:annotation>
+            <xs:documentation>For internal use only</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="PunterReferenceNumber" type="xs:long"/>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfInt">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="int" type="xs:int"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="GetAccountBalancesRequest">
+        <xs:sequence/>
+      </xs:complexType>
+      <xs:complexType name="UpdateOrdersNoReceiptRequestItem">
+        <xs:attribute name="BetId" type="xs:long"/>
+        <xs:attribute name="DeltaStake" type="xs:decimal" use="required"/>
+        <xs:attribute name="Price" type="xs:decimal" use="required"/>
+        <xs:attribute name="ExpectedSelectionResetCount" type="xs:unsignedByte"/>
+        <xs:attribute name="ExpectedWithdrawalSequenceNumber" type="xs:unsignedByte"/>
+        <xs:attribute name="CancelOnInRunning" type="xs:boolean" use="optional"/>
+        <xs:attribute name="CancelIfSelectionReset" type="xs:boolean" use="optional"/>
+      </xs:complexType>
+      <xs:complexType name="UpdateOrdersNoReceiptResponseItem">
+        <xs:attribute name="BetId" type="xs:long"/>
+        <xs:attribute name="ReturnCode" type="xs:int"/>
+      </xs:complexType>
+      <xs:complexType name="UpdateOrdersNoReceiptRequest">
+        <xs:sequence>
+          <xs:element name="Orders">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Order" type="UpdateOrdersNoReceiptRequestItem" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="UpdateOrdersNoReceiptResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence>
+              <xs:element name="Orders">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Order" type="UpdateOrdersNoReceiptResponseItem" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="ListAccountPostingsRequest">
+        <xs:attribute name="StartTime" type="xs:dateTime"/>
+        <xs:attribute name="EndTime" type="xs:dateTime"/>
+      </xs:complexType>
+      <xs:complexType name="ListAccountPostingsResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence>
+              <xs:element name="Orders">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Order" type="ListAccountPostingsResponseItem" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="Currency" type="xs:string"/>
+            <xs:attribute name="AvailableFunds" type="xs:decimal"/>
+            <xs:attribute name="Balance" type="xs:decimal"/>
+            <xs:attribute name="Credit" type="xs:decimal"/>
+            <xs:attribute name="Exposure" type="xs:decimal"/>
+            <xs:attribute name="HaveAllPostingsBeenReturned" type="xs:boolean"/>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="ListAccountPostingsResponseItem">
+        <xs:sequence/>
+        <xs:attribute name="PostedAt" type="xs:dateTime"/>
+        <xs:attribute name="Description" type="xs:string"/>
+        <xs:attribute name="Amount" type="xs:decimal"/>
+        <xs:attribute name="ResultingBalance" type="xs:decimal"/>
+        <xs:attribute name="PostingCategory" type="xs:unsignedByte"/>
+        <xs:attribute name="OrderId" type="xs:long" use="optional"/>
+        <xs:attribute name="MarketId" type="xs:long" use="optional"/>
+        <xs:attribute name="TransactionId" type="xs:long"/>
+      </xs:complexType>
+      <xs:complexType name="ListAccountPostingsByIdRequest">
+        <xs:attribute name="TransactionId" type="xs:long" use="required"/>
+      </xs:complexType>
+      <xs:complexType name="ListAccountPostingsByIdResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence>
+              <xs:element name="Orders">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Order" type="ListAccountPostingsByIdResponseItem" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="Currency" type="xs:string"/>
+            <xs:attribute name="AvailableFunds" type="xs:decimal"/>
+            <xs:attribute name="Balance" type="xs:decimal"/>
+            <xs:attribute name="Credit" type="xs:decimal"/>
+            <xs:attribute name="Exposure" type="xs:decimal"/>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="ListAccountPostingsByIdResponseItem">
+        <xs:sequence/>
+        <xs:attribute name="PostedAt" type="xs:dateTime"/>
+        <xs:attribute name="Description" type="xs:string"/>
+        <xs:attribute name="Amount" type="xs:decimal"/>
+        <xs:attribute name="ResultingBalance" type="xs:decimal"/>
+        <xs:attribute name="PostingCategory" type="xs:unsignedByte"/>
+        <xs:attribute name="OrderId" type="xs:long" use="optional"/>
+        <xs:attribute name="MarketId" type="xs:long" use="optional"/>
+        <xs:attribute name="TransactionId" type="xs:long" use="required"/>
+      </xs:complexType>
+      <xs:complexType name="GetOrderDetailsRequest">
+        <xs:attribute name="OrderId" type="xs:long"/>
+      </xs:complexType>
+      <xs:complexType name="GetOrderDetailsResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence>
+              <xs:element name="OrderSettlementInformation" type="OrderSettlementInformationType" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="AuditLog">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="AuditLog" type="AuditLogItem" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="SelectionId" type="xs:long"/>
+            <xs:attribute name="OrderStatus" type="xs:unsignedByte">
+              <xs:annotation>
+                <xs:documentation>Unmatched(1), Matched(2), Cancelled(3), Settled(4), Void(5), Suspended(6)</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="IssuedAt" type="xs:dateTime"/>
+            <xs:attribute name="LastChangedAt" type="xs:dateTime"/>
+            <xs:attribute name="ExpiresAt" type="xs:dateTime"/>
+            <xs:attribute name="ValidFrom" type="xs:dateTime"/>
+            <xs:attribute name="RestrictOrderToBroker" type="xs:boolean"/>
+            <xs:attribute name="OrderFillType" type="xs:unsignedByte">
+              <xs:annotation>
+                <xs:documentation>Normal(1), FillAndKill(2), FillOrKill(3), FillOrKillDontCancel(4)</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="FillOrKillThreshold" type="xs:decimal" use="optional"/>
+            <xs:attribute name="MarketId" type="xs:long"/>
+            <xs:attribute name="MarketStatus" type="xs:unsignedByte">
+              <xs:annotation>
+                <xs:documentation>Inactive(1), Active(2), Suspended(3), Completed(4), Settled(6), Voided(7)</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="RequestedStake" type="xs:decimal"/>
+            <xs:attribute name="RequestedPrice" type="xs:decimal"/>
+            <xs:attribute name="ExpectedSelectionResetCount" type="xs:unsignedByte"/>
+            <xs:attribute name="TotalStake" type="xs:decimal"/>
+            <xs:attribute name="UnmatchedStake" type="xs:decimal"/>
+            <xs:attribute name="AveragePrice" type="xs:decimal"/>
+            <xs:attribute name="MatchingTimeStamp" type="xs:dateTime"/>
+            <xs:attribute name="Polarity" type="xs:unsignedByte"/>
+            <xs:attribute name="WithdrawalRepriceOption" type="xs:unsignedByte">
+              <xs:annotation>
+                <xs:documentation>Reprice(1), Cancel(2), DontReprice(3)</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="CancelOnInRunning" type="xs:boolean"/>
+            <xs:attribute name="CancelIfSelectionReset" type="xs:boolean"/>
+            <xs:attribute name="SequenceNumber" type="xs:long"/>
+            <xs:attribute name="PunterReferenceNumber" type="xs:long"/>
+            <xs:attribute name="MarketType" type="xs:unsignedByte">
+              <xs:annotation>
+                <xs:documentation>Win (1), Place (2), MatchOdds (3), OverUnder (4), AsianHandicap (10), TwoBall (11), ThreeBall (12), Unspecified (13), MatchMarket (14), SetMarket (15), Moneyline (16), Total (17), Handicap (18), EachWayNonHandicap (19), EachWayHandicap (20), EachWayTournament (21), RunningBall (22),  MatchBetting (23), MatchBettingInclDraw (24), CorrectScore (25), HalfTimeFullTime (26), TotalGoals (27), GoalsScored (28), Corners (29), OddsOrEvens (30), HalfTimeResult (31), HalfTimeScore (32), MatchOddsExtraTime (33), CorrectScoreExtraTime (34), OverUnderExtraTime (35), ToQualify (36), DrawNoBet (37), HalftimeAsianHcp (39), HalftimeOverUnder (40), NextGoal (41), FirstGoalscorer (42), LastGoalscorer (43), PlayerToScore (44), FirstHalfHandicap (45), FirstHalfTotal (46), SetBetting (47), GroupBetting (48), MatchplaySingle (49), MatchplayFourball (50), MatchplayFoursome (51), TiedMatch (52), TopBatsman (53), InningsRuns (54), TotalTries (55), TotalPoints (56), FrameBetting (57), ToScoreFirst (58), ToScoreLast (59), FirstScoringPlay (60), LastScoringPlay (61), HighestScoringQtr (62), RunLine (63), RoundBetting (64), LineBetting (65)</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="ExpectedWithdrawalSequenceNumber" type="xs:unsignedByte"/>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="OrderSettlementInformationType">
+        <xs:attribute name="GrossSettlementAmount" type="xs:decimal"/>
+        <xs:attribute name="OrderCommission" type="xs:decimal"/>
+        <xs:attribute name="MarketCommission" type="xs:decimal"/>
+        <xs:attribute name="MarketSettledDate" type="xs:dateTime"/>
+      </xs:complexType>
+      <xs:complexType name="AuditLogItem">
+        <xs:sequence>
+          <xs:element name="MatchedOrderInformation" type="MatchedOrderInformationType"/>
+          <xs:element name="CommissionInformation" type="CommissionInformationType" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="Time" type="xs:dateTime"/>
+        <xs:attribute name="OrderActionType" type="xs:unsignedByte">
+          <xs:annotation>
+            <xs:documentation>Placed(1), ExplicitlyUpdated(2), Matched(3), CancelledExplicitly(4), CancelledByReset(5), CancelledOnInRunning(6), Expired(7), MatchedPortionRepricedByR4(8), UnmatchedPortionRepricedByR4(9), UnmatchedPortionCancelledByWithdrawal(10), Voided(11), Settled(12), Suspended(13), Unsuspended(14)</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="RequestedStake" type="xs:decimal"/>
+        <xs:attribute name="TotalStake" type="xs:decimal"/>
+        <xs:attribute name="TotalAgainstStake" type="xs:decimal"/>
+        <xs:attribute name="RequestedPrice" type="xs:decimal"/>
+        <xs:attribute name="AveragePrice" type="xs:decimal"/>
+      </xs:complexType>
+      <xs:complexType name="MatchedOrderInformationType">
+        <xs:attribute name="MatchedStake" type="xs:decimal"/>
+        <xs:attribute name="MatchedAgainstStake" type="xs:decimal"/>
+        <xs:attribute name="PriceMatched" type="xs:decimal"/>
+        <xs:attribute name="MatchedOrderID" type="xs:long"/>
+        <xs:attribute name="WasMake" type="xs:boolean" use="optional"/>
+      </xs:complexType>
+      <xs:complexType name="CommissionInformationType">
+        <xs:attribute name="GrossSettlementAmount" type="xs:decimal" use="required"/>
+        <xs:attribute name="OrderCommission" type="xs:decimal" use="required"/>
+      </xs:complexType>
+      <xs:complexType name="ListTopLevelEventsRequest">
+        <xs:attribute name="WantPlayMarkets" type="xs:boolean" use="optional"/>
+      </xs:complexType>
+      <xs:complexType name="ListTopLevelEventsResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence maxOccurs="unbounded">
+              <xs:element name="EventClassifiers" type="EventClassifierType"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="EventClassifierType">
+        <xs:sequence>
+          <xs:element name="EventClassifiers" type="EventClassifierType" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="Markets" type="MarketType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="Id" type="xs:long" use="required"/>
+        <xs:attribute name="Name" type="xs:string" use="required"/>
+        <xs:attribute name="DisplayOrder" type="xs:short" use="required"/>
+        <xs:attribute name="IsEnabledForMultiples" type="xs:boolean" use="required"/>
+        <xs:attribute name="ParentId" type="xs:long" use="optional"/>
+      </xs:complexType>
+      <xs:complexType name="GetEventSubTreeWithSelectionsRequest">
+        <xs:sequence maxOccurs="unbounded">
+          <xs:element name="EventClassifierIds" type="xs:long"/>
+        </xs:sequence>
+        <xs:attribute name="WantPlayMarkets" type="xs:boolean" use="optional"/>
+      </xs:complexType>
+      <xs:complexType name="GetEventSubTreeWithSelectionsResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence maxOccurs="unbounded">
+              <xs:element name="EventClassifiers" type="EventClassifierType"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="GetEventSubTreeNoSelectionsRequest">
+        <xs:sequence maxOccurs="unbounded">
+          <xs:element name="EventClassifierIds" type="xs:long"/>
+        </xs:sequence>
+        <xs:attribute name="WantDirectDescendentsOnly" type="xs:boolean" use="optional"/>
+        <xs:attribute name="WantPlayMarkets" type="xs:boolean" use="optional"/>
+      </xs:complexType>
+      <xs:complexType name="GetEventSubTreeNoSelectionsResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence maxOccurs="unbounded">
+              <xs:element name="EventClassifiers" type="EventClassifierType"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="MarketType">
+        <xs:sequence>
+          <xs:element name="Selections" type="SelectionType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="Id" type="xs:long" use="required"/>
+        <xs:attribute name="Name" type="xs:string" use="required"/>
+        <xs:attribute name="Type" type="xs:short" use="required"/>
+        <xs:attribute name="IsPlayMarket" type="xs:boolean" use="required"/>
+        <xs:attribute name="Status" type="xs:short" use="required">
+          <xs:annotation>
+            <xs:documentation>Inactive(1), Active(2), Suspended(3), Withdrawn(4), BallotedOut(9), Voided(5), Completed(6), Settled(8)</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="NumberOfWinningSelections" type="xs:short" use="required"/>
+        <xs:attribute name="StartTime" type="xs:dateTime" use="required"/>
+        <xs:attribute name="WithdrawalSequenceNumber" type="xs:short" use="required"/>
+        <xs:attribute name="DisplayOrder" type="xs:short" use="required"/>
+        <xs:attribute name="IsEnabledForMultiples" type="xs:boolean" use="required"/>
+        <xs:attribute name="IsInRunningAllowed" type="xs:boolean" use="required"/>
+        <xs:attribute name="IsManagedWhenInRunning" type="xs:boolean" use="required"/>
+        <xs:attribute name="IsCurrentlyInRunning" type="xs:boolean" use="required"/>
+        <xs:attribute name="InRunningDelaySeconds" type="xs:int" use="required"/>
+        <xs:attribute name="EventClassifierId" type="xs:long" use="optional"/>
+        <xs:attribute name="PlacePayout" type="xs:decimal" use="optional"/>
+      </xs:complexType>
+      <xs:complexType name="SelectionType">
+        <xs:attribute name="Id" type="xs:long" use="required"/>
+        <xs:attribute name="Name" type="xs:string" use="required"/>
+        <xs:attribute name="Status" type="xs:short" use="required"/>
+        <xs:attribute name="ResetCount" type="xs:short" use="required"/>
+        <xs:attribute name="DeductionFactor" type="xs:decimal" use="required"/>
+        <xs:attribute name="DisplayOrder" type="xs:int" use="required"/>
+      </xs:complexType>
+      <xs:complexType name="GetMarketInformationRequest">
+        <xs:sequence>
+          <xs:sequence minOccurs="1" maxOccurs="unbounded">
+            <xs:element name="MarketIds" type="xs:long"/>
+          </xs:sequence>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="GetMarketInformationResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence maxOccurs="unbounded">
+              <xs:element name="Markets" type="MarketType"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="ChangePasswordResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="ChangePasswordRequest">
+        <xs:attribute name="Password" type="xs:string" use="required"/>
+      </xs:complexType>
+      <xs:complexType name="ListMarketWithdrawalHistoryResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence maxOccurs="unbounded">
+              <xs:element name="Withdrawals" type="ListMarketWithdrawalHistoryResponseItem"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="ListMarketWithdrawalHistoryResponseItem">
+        <xs:attribute name="SelectionId" type="xs:long" use="required"/>
+        <xs:attribute name="WithdrawalTime" type="xs:dateTime" use="required"/>
+        <xs:attribute name="SequenceNumber" type="xs:short" use="required"/>
+        <xs:attribute name="ReductionFactor" type="xs:decimal" use="required"/>
+        <xs:attribute name="CompoundReductionFactor" type="xs:decimal" use="required"/>
+      </xs:complexType>
+      <xs:complexType name="ListMarketWithdrawalHistoryRequest">
+        <xs:attribute name="MarketId" type="xs:long" use="required"/>
+      </xs:complexType>
+
+      <xs:complexType name="GetPricesRequest">
+        <xs:sequence minOccurs="1" maxOccurs="unbounded">
+          <xs:element name="MarketIds" type="xs:long"/>
+        </xs:sequence>
+        <xs:attribute name="ThresholdAmount" type="xs:decimal" use="required"/>
+        <xs:attribute name="NumberForPricesRequired" type="xs:int" use="required"/>
+        <xs:attribute name="NumberAgainstPricesRequired" type="xs:int" use="required"/>
+	<xs:attribute name="WantMarketMatchedAmount" type="xs:boolean" use="optional"/>
+	<xs:attribute name="WantSelectionsMatchedAmounts" type="xs:boolean" use="optional"/>
+	<xs:attribute name="WantSelectionMatchedDetails" type="xs:boolean" use="optional"/>
+      </xs:complexType>
+      <xs:complexType name="GetPricesResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence maxOccurs="unbounded">
+              <xs:element name="MarketPrices" type="MarketTypeWithPrices"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+
+      <xs:complexType name="SelectionTypeWithPrices">
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="ForSidePrices" type="PricesType"/>
+          <xs:element name="AgainstSidePrices" type="PricesType"/>
+        </xs:sequence>
+        <xs:attribute name="Id" type="xs:long" use="required"/>
+        <xs:attribute name="Name" type="xs:string" use="required"/>
+        <xs:attribute name="Status" type="xs:short" use="required"/>
+        <xs:attribute name="ResetCount" type="xs:short" use="required"/>
+        <xs:attribute name="DeductionFactor" type="xs:decimal" use="required"/>
+	<xs:attribute name="MatchedSelectionForStake" type="xs:decimal" use="optional"/>
+	<xs:attribute name="MatchedSelectionAgainstStake" type="xs:decimal" use="optional"/>
+	<xs:attribute name="LastMatchedOccurredAt" type="xs:dateTime" use="optional"/>
+	<xs:attribute name="LastMatchedPrice" type="xs:decimal" use="optional"/>
+	<xs:attribute name="LastMatchedForSideAmount" type="xs:decimal" use="optional"/>
+      </xs:complexType>
+      <xs:complexType name="MarketTypeWithPrices">
+        <xs:sequence>
+          <xs:element name="Selections" type="SelectionTypeWithPrices" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="Id" type="xs:long" use="required"/>
+        <xs:attribute name="Name" type="xs:string" use="required"/>
+        <xs:attribute name="Type" type="xs:short" use="required"/>
+        <xs:attribute name="IsPlayMarket" type="xs:boolean" use="required"/>
+        <xs:attribute name="Status" type="xs:short" use="required"/>
+        <xs:attribute name="NumberOfWinningSelections" type="xs:short" use="required"/>
+        <xs:attribute name="StartTime" type="xs:dateTime" use="required"/>
+        <xs:attribute name="WithdrawalSequenceNumber" type="xs:short" use="required"/>
+        <xs:attribute name="DisplayOrder" type="xs:short" use="required"/>
+        <xs:attribute name="IsEnabledForMultiples" type="xs:boolean" use="required"/>
+        <xs:attribute name="IsInRunningAllowed" type="xs:boolean" use="required"/>
+        <xs:attribute name="IsManagedWhenInRunning" type="xs:boolean" use="required"/>
+        <xs:attribute name="IsCurrentlyInRunning" type="xs:boolean" use="required"/>
+        <xs:attribute name="InRunningDelaySeconds" type="xs:int" use="required"/>
+        <xs:attribute name="ReturnCode" type="xs:int" use="optional"/>
+        <xs:attribute name="TotalMatchedAmount" type="xs:decimal" use="optional"/>
+        <xs:attribute name="PlacePayout" type="xs:decimal" use="optional"/>
+    	<xs:attribute name="MatchedMarketForStake" type="xs:decimal" use="optional"/>
+    	<xs:attribute name="MatchedMarketAgainstStake" type="xs:decimal" use="optional"/>
+      </xs:complexType>
+      <xs:complexType name="PricesType">
+        <xs:attribute name="Price" type="xs:decimal" use="required"/>
+        <xs:attribute name="Stake" type="xs:decimal" use="required"/>
+      </xs:complexType>
+      <xs:complexType name="CancelAllOrdersOnMarketRequest">
+        <xs:sequence minOccurs="1" maxOccurs="unbounded">
+          <xs:element name="MarketIds" type="xs:long"/>
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="CancelAllOrdersOnMarketResponseItem">
+        <xs:attribute name="OrderHandle" type="xs:long"/>
+        <xs:attribute name="cancelledForSideStake" type="xs:decimal"/>
+        <xs:attribute name="PunterReferenceNumber" type="xs:long" use="required"/>
+      </xs:complexType>
+      <xs:complexType name="CancelAllOrdersOnMarketResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+              <xs:element name="OrderIds" type="xs:long"/>
+              <xs:element name="Order" type="CancelAllOrdersOnMarketResponseItem"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="CancelAllOrdersResponseItem">
+        <xs:attribute name="OrderHandle" type="xs:long"/>
+        <xs:attribute name="cancelledForSideStake" type="xs:decimal"/>
+        <xs:attribute name="PunterReferenceNumber" type="xs:long" use="required"/>
+      </xs:complexType>
+
+
+
+      <xs:complexType name="SuspendFromTradingRequest">
+      </xs:complexType>
+      <xs:complexType name="SuspendFromTradingResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="UnsuspendFromTradingRequest">
+      </xs:complexType>
+      <xs:complexType name="UnsuspendFromTradingResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="SuspendOrdersResponseItem">
+        <xs:attribute name="OrderId" type="xs:long" use="required"/>
+        <xs:attribute name="SuspendedForSideStake" type="xs:decimal" use="required"/>
+        <xs:attribute name="PunterReferenceNumber" type="xs:long" use="required"/>
+      </xs:complexType>
+      <xs:complexType name="SuspendOrdersRequest">
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="OrderIds" type="xs:long"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="SuspendOrdersResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+              <xs:element name="Orders" type="SuspendOrdersResponseItem"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+
+      <xs:complexType name="SuspendAllOrdersOnMarketRequest">
+        <xs:attribute name="MarketId" type="xs:long"/>
+      </xs:complexType>
+      <xs:complexType name="SuspendAllOrdersOnMarketResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+              <xs:element name="Orders" type="SuspendOrdersResponseItem"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+
+      <xs:complexType name="UnsuspendOrdersRequest">
+        <xs:sequence minOccurs="1" maxOccurs="unbounded">
+          <xs:element name="OrderIds" type="xs:long"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="UnsuspendOrdersResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="SuspendAllOrdersRequest">
+      </xs:complexType>
+      <xs:complexType name="SuspendAllOrdersResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+              <xs:element name="Orders" type="SuspendOrdersResponseItem"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+
+
+      <xs:complexType name="ListBlacklistInformationRequest">
+      </xs:complexType>
+      <xs:complexType name="ListBlacklistInformationResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+              <xs:element name="ApiNamesAndTimes" type="ApiTimes"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="ApiTimes">
+        <xs:attribute name="ApiName" type="xs:string" use="required"/>
+        <xs:attribute name="RemainingMS" type="xs:int" use="required"/>
+      </xs:complexType>
+      <xs:complexType name="RegisterHeartbeatRequest">
+        <xs:attribute name="ThresholdMs" type="xs:int" use="required"/>
+        <xs:attribute name="HeartbeatAction" type="xs:unsignedByte" use="required">
+          <xs:annotation>
+            <xs:documentation>CancelOrders(1), SuspendOrders(2), SuspendPunter(3)</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:complexType>
+
+      <xs:complexType name="RegisterHeartbeatResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+
+      <xs:complexType name="ChangeHeartbeatRegistrationRequest">
+        <xs:attribute name="ThresholdMs" type="xs:int" use="required"/>
+        <xs:attribute name="HeartbeatAction" type="xs:unsignedByte" use="required">
+          <xs:annotation>
+            <xs:documentation>CancelOrders(1), SuspendOrders(2), SuspendPunter(3)</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:complexType>
+
+      <xs:complexType name="ChangeHeartbeatRegistrationResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+
+      <xs:complexType name="DeregisterHeartbeatRequest">
+      </xs:complexType>
+
+      <xs:complexType name="DeregisterHeartbeatResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse"/>
+        </xs:complexContent>
+      </xs:complexType>
+
+      <xs:complexType name="PulseRequest">
+      </xs:complexType>
+
+      <xs:complexType name="PulseResponse">
+        <xs:complexContent>
+          <xs:extension base="BaseResponse">
+            <xs:attribute name="PerformedAt" type="xs:dateTime"/>
+            <xs:attribute name="HeartbeatAction" type="xs:unsignedByte">
+              <xs:annotation>
+                <xs:documentation>CancelOrders(1), SuspendOrders(2), SuspendPunter(3)</xs:documentation>
+              </xs:annotation>
+            </xs:attribute>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <!-- Types END -->
+      <!-- WS START -->
+      <xs:element name="ExternalApiHeader" type="ExternalApiHeader"/>
+      <xs:complexType name="ExternalApiHeader">
+        <xs:attribute name="version" type="xs:decimal" use="required"/>
+        <xs:attribute name="languageCode" type="xs:string" use="required"/>
+        <xs:attribute name="username" type="xs:string" use="required"/>
+        <xs:attribute name="password" type="xs:string" use="optional"/>
+        <xs:attribute name="applicationIdentifier" type="xs:string" use="optional"/>
+      </xs:complexType>
+      <xs:element name="ListTopLevelEvents">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="listTopLevelEventsRequest" type="ListTopLevelEventsRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListTopLevelEventsResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="ListTopLevelEventsResult" type="ListTopLevelEventsResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetPrices">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="getPricesRequest" type="GetPricesRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetPricesResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="GetPricesResult" type="GetPricesResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListMarketWithdrawalHistory">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="listMarketWithdrawalHistoryRequest" type="ListMarketWithdrawalHistoryRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListMarketWithdrawalHistoryResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="ListMarketWithdrawalHistoryResult" type="ListMarketWithdrawalHistoryResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetEventSubTreeWithSelections">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="getEventSubTreeWithSelectionsRequest" type="GetEventSubTreeWithSelectionsRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetEventSubTreeWithSelectionsResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="GetEventSubTreeWithSelectionsResult" type="GetEventSubTreeWithSelectionsResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListOrdersChangedSince">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="listOrdersChangedSinceRequest" type="ListOrdersChangedSinceRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListOrdersChangedSinceResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="ListOrdersChangedSinceResult" type="ListOrdersChangedSinceResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetEventSubTreeNoSelections">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="getEventSubTreeNoSelectionsRequest" type="GetEventSubTreeNoSelectionsRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetEventSubTreeNoSelectionsResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="GetEventSubTreeNoSelectionsResult" type="GetEventSubTreeNoSelectionsResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetMarketInformation">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="getMarketInformationRequest" type="GetMarketInformationRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetMarketInformationResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="GetMarketInformationResult" type="GetMarketInformationResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PlaceOrdersNoReceipt">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="placeOrdersNoReceiptRequest" type="PlaceOrdersNoReceiptRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PlaceOrdersNoReceiptResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="PlaceOrdersNoReceiptResult" type="PlaceOrdersNoReceiptResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PlaceOrdersWithReceipt">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="orders" type="PlaceOrdersWithReceiptRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PlaceOrdersWithReceiptResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="PlaceOrdersWithReceiptResult" type="PlaceOrdersWithReceiptResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CancelOrders">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="cancelOrdersRequest" type="CancelOrdersRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CancelOrdersResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="CancelOrdersResult" type="CancelOrdersResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CancelAllOrders">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="cancelAllOrdersRequest" type="CancelAllOrdersRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CancelAllOrdersResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="CancelAllOrdersResult" type="CancelAllOrdersResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="CancelAllOrdersOnMarket">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="cancelAllOrdersOnMarketRequest" type="CancelAllOrdersOnMarketRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CancelAllOrdersOnMarketResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="CancelAllOrdersOnMarketResult" type="CancelAllOrdersOnMarketResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="GetAccountBalances">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="getAccountBalancesRequest" type="GetAccountBalancesRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetAccountBalancesResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="GetAccountBalancesResult" type="GetAccountBalancesResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListAccountPostings">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="listAccountPostingsRequest" type="ListAccountPostingsRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListAccountPostingsResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="ListAccountPostingsResult" type="ListAccountPostingsResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListAccountPostingsById">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="listAccountPostingsByIdRequest" type="ListAccountPostingsByIdRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListAccountPostingsByIdResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="ListAccountPostingsByIdResult" type="ListAccountPostingsByIdResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="UpdateOrdersNoReceipt">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="updateOrdersNoReceiptRequest" type="UpdateOrdersNoReceiptRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="UpdateOrdersNoReceiptResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="UpdateOrdersNoReceiptResult" type="UpdateOrdersNoReceiptResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetOrderDetails">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="getOrderDetailsRequest" type="GetOrderDetailsRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetOrderDetailsResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="GetOrderDetailsResult" type="GetOrderDetailsResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ChangePassword">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="changePasswordRequest" type="ChangePasswordRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ChangePasswordResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="ChangePasswordResult" type="ChangePasswordResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="ListSelectionsChangedSince">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="listSelectionsChangedSinceRequest" type="ListSelectionsChangedSinceRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListSelectionsChangedSinceResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="ListSelectionsChangedSinceResult" type="ListSelectionsChangedSinceResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListBootstrapOrders">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="listBootstrapOrdersRequest" type="ListBootstrapOrdersRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListBootstrapOrdersResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="ListBootstrapOrdersResult" type="ListBootstrapOrdersResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="SuspendFromTrading">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="suspendFromTradingRequest" type="SuspendFromTradingRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="SuspendFromTradingResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="SuspendFromTradingResult" type="SuspendFromTradingResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="UnsuspendFromTrading">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="unsuspendFromTradingRequest" type="UnsuspendFromTradingRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="UnsuspendFromTradingResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="UnsuspendFromTradingResult" type="UnsuspendFromTradingResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="SuspendOrders">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="1" maxOccurs="1" name="suspendOrdersRequest" type="SuspendOrdersRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="SuspendOrdersResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="SuspendOrdersResult" type="SuspendOrdersResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="SuspendAllOrdersOnMarket">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="1" maxOccurs="1" name="suspendAllOrdersOnMarket" type="SuspendAllOrdersOnMarketRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="SuspendAllOrdersOnMarketResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="SuspendAllOrdersOnMarketResult" type="SuspendAllOrdersOnMarketResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="UnsuspendOrders">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="unsuspendOrdersRequest" type="UnsuspendOrdersRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="UnsuspendOrdersResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="UnsuspendOrdersResult" type="UnsuspendOrdersResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="SuspendAllOrders">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="suspendAllOrdersRequest" type="SuspendAllOrdersRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="SuspendAllOrdersResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="SuspendAllOrdersResult" type="SuspendAllOrdersResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListBlacklistInformation">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="listBlacklistInformationRequest" type="ListBlacklistInformationRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListBlacklistInformationResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="ListBlacklistInformationResult" type="ListBlacklistInformationResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="RegisterHeartbeat">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="registerHeartbeatRequest" type="RegisterHeartbeatRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="RegisterHeartbeatResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="RegisterHeartbeatResult" type="RegisterHeartbeatResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+
+      <xs:element name="ChangeHeartbeatRegistration">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="changeHeartbeatRegistrationRequest" type="ChangeHeartbeatRegistrationRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ChangeHeartbeatRegistrationResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="ChangeHeartbeatRegistrationResult" type="ChangeHeartbeatRegistrationResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="DeregisterHeartbeat">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="deregisterHeartbeatRequest" type="DeregisterHeartbeatRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="DeregisterHeartbeatResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="DeregisterHeartbeatResult" type="DeregisterHeartbeatResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="Pulse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="pulseRequest" type="PulseRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PulseResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="PulseResult" type="PulseResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+
+      <xs:element name="GetOddsLadder">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="getOddsLadderRequest" type="GetOddsLadderRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="GetOddsLadderRequest">
+        <xs:attribute name="PriceFormat" type="xs:unsignedByte"/>
+      </xs:complexType>
+      <xs:element name="GetOddsLadderResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="GetOddsLadderResult" type="GetOddsLadderResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="GetOddsLadderResponse">
+        <xs:complexContent mixed="false">
+          <xs:extension base="BaseResponse">
+            <xs:sequence>
+              <xs:element minOccurs="0" maxOccurs="unbounded" name="Ladder" type="GetOddsLadderResponseItem"/>
+            </xs:sequence>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+      <xs:complexType name="GetOddsLadderResponseItem">
+        <xs:attribute name="price" type="xs:decimal"/>
+        <xs:attribute name="representation" type="xs:string"/>
+      </xs:complexType>
+
+
+      <!-- GetCurrentSelectionSequenceNumber -->
+      <xs:element name="GetCurrentSelectionSequenceNumber">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="getCurrentSelectionSequenceNumberRequest" type="GetCurrentSelectionSequenceNumberRequest"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="GetCurrentSelectionSequenceNumberRequest"/>
+      <xs:element name="GetCurrentSelectionSequenceNumberResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="GetCurrentSelectionSequenceNumberResult" type="GetCurrentSelectionSequenceNumberResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="GetCurrentSelectionSequenceNumberResponse">
+        <xs:complexContent mixed="false">
+          <xs:extension base="BaseResponse">
+            <xs:attribute name="SelectionSequenceNumber" type="xs:long"/>
+          </xs:extension>
+        </xs:complexContent>
+      </xs:complexType>
+
+    </xs:schema>
+  </wsdl:types>
+
+  <!-- WS END -->
+
+  <wsdl:message name="ListSelectionsChangedSinceSoapIn">
+    <wsdl:part name="parameters" element="ListSelectionsChangedSince"/>
+  </wsdl:message>
+  <wsdl:message name="ListSelectionsChangedSinceSoapOut">
+    <wsdl:part name="parameters" element="ListSelectionsChangedSinceResponse"/>
+  </wsdl:message>
+  <wsdl:message name="ListSelectionsChangedSinceExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="ListBootstrapOrdersSoapIn">
+    <wsdl:part name="parameters" element="ListBootstrapOrders"/>
+  </wsdl:message>
+  <wsdl:message name="ListBootstrapOrdersSoapOut">
+    <wsdl:part name="parameters" element="ListBootstrapOrdersResponse"/>
+  </wsdl:message>
+  <wsdl:message name="ListBootstrapOrdersExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="ListTopLevelEventsSoapIn">
+    <wsdl:part name="parameters" element="ListTopLevelEvents"/>
+  </wsdl:message>
+  <wsdl:message name="ListTopLevelEventsSoapOut">
+    <wsdl:part name="parameters" element="ListTopLevelEventsResponse"/>
+  </wsdl:message>
+  <wsdl:message name="ListTopLevelEventsExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="GetEventSubTreeWithSelectionsSoapIn">
+    <wsdl:part name="parameters" element="GetEventSubTreeWithSelections"/>
+  </wsdl:message>
+  <wsdl:message name="GetEventSubTreeWithSelectionsSoapOut">
+    <wsdl:part name="parameters" element="GetEventSubTreeWithSelectionsResponse"/>
+  </wsdl:message>
+  <wsdl:message name="GetEventSubTreeWithSelectionsExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="ListOrdersChangedSinceSoapIn">
+    <wsdl:part name="parameters" element="ListOrdersChangedSince"/>
+  </wsdl:message>
+  <wsdl:message name="ListOrdersChangedSinceSoapOut">
+    <wsdl:part name="parameters" element="ListOrdersChangedSinceResponse"/>
+  </wsdl:message>
+  <wsdl:message name="ListOrdersChangedSinceExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="GetEventSubTreeNoSelectionsSoapIn">
+    <wsdl:part name="parameters" element="GetEventSubTreeNoSelections"/>
+  </wsdl:message>
+  <wsdl:message name="GetEventSubTreeNoSelectionsSoapOut">
+    <wsdl:part name="parameters" element="GetEventSubTreeNoSelectionsResponse"/>
+  </wsdl:message>
+  <wsdl:message name="GetEventSubTreeNoSelectionsExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="GetMarketInformationSoapIn">
+    <wsdl:part name="parameters" element="GetMarketInformation"/>
+  </wsdl:message>
+  <wsdl:message name="GetMarketInformationSoapOut">
+    <wsdl:part name="parameters" element="GetMarketInformationResponse"/>
+  </wsdl:message>
+  <wsdl:message name="GetMarketInformationExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="PlaceOrdersNoReceiptSoapIn">
+    <wsdl:part name="parameters" element="PlaceOrdersNoReceipt"/>
+  </wsdl:message>
+  <wsdl:message name="PlaceOrdersNoReceiptSoapOut">
+    <wsdl:part name="parameters" element="PlaceOrdersNoReceiptResponse"/>
+  </wsdl:message>
+  <wsdl:message name="PlaceOrdersNoReceiptExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="PlaceOrdersWithReceiptSoapIn">
+    <wsdl:part name="parameters" element="PlaceOrdersWithReceipt"/>
+  </wsdl:message>
+  <wsdl:message name="PlaceOrdersWithReceiptSoapOut">
+    <wsdl:part name="parameters" element="PlaceOrdersWithReceiptResponse"/>
+  </wsdl:message>
+  <wsdl:message name="PlaceOrdersWithReceiptExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="CancelOrdersSoapIn">
+    <wsdl:part name="parameters" element="CancelOrders"/>
+  </wsdl:message>
+  <wsdl:message name="CancelOrdersSoapOut">
+    <wsdl:part name="parameters" element="CancelOrdersResponse"/>
+  </wsdl:message>
+  <wsdl:message name="CancelOrdersExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+
+  <wsdl:message name="CancelAllOrdersSoapIn">
+    <wsdl:part name="parameters" element="CancelAllOrders"/>
+  </wsdl:message>
+  <wsdl:message name="CancelAllOrdersSoapOut">
+    <wsdl:part name="parameters" element="CancelAllOrdersResponse"/>
+  </wsdl:message>
+  <wsdl:message name="CancelAllOrdersExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+
+  <wsdl:message name="CancelAllOrdersOnMarketSoapIn">
+    <wsdl:part name="parameters" element="CancelAllOrdersOnMarket"/>
+  </wsdl:message>
+  <wsdl:message name="CancelAllOrdersOnMarketSoapOut">
+    <wsdl:part name="parameters" element="CancelAllOrdersOnMarketResponse"/>
+  </wsdl:message>
+  <wsdl:message name="CancelAllOrdersOnMarketExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+
+  <wsdl:message name="GetAccountBalancesSoapIn">
+    <wsdl:part name="parameters" element="GetAccountBalances"/>
+  </wsdl:message>
+  <wsdl:message name="GetAccountBalancesSoapOut">
+    <wsdl:part name="parameters" element="GetAccountBalancesResponse"/>
+  </wsdl:message>
+  <wsdl:message name="GetAccountBalancesExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="ListAccountPostingsSoapIn">
+    <wsdl:part name="parameters" element="ListAccountPostings"/>
+  </wsdl:message>
+  <wsdl:message name="ListAccountPostingsSoapOut">
+    <wsdl:part name="parameters" element="ListAccountPostingsResponse"/>
+  </wsdl:message>
+  <wsdl:message name="ListAccountPostingsExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="ListAccountPostingsByIdSoapIn">
+    <wsdl:part name="parameters" element="ListAccountPostingsById"/>
+  </wsdl:message>
+  <wsdl:message name="ListAccountPostingsByIdSoapOut">
+    <wsdl:part name="parameters" element="ListAccountPostingsByIdResponse"/>
+  </wsdl:message>
+  <wsdl:message name="ListAccountPostingsByIdExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="UpdateOrdersNoReceiptSoapIn">
+    <wsdl:part name="parameters" element="UpdateOrdersNoReceipt"/>
+  </wsdl:message>
+  <wsdl:message name="UpdateOrdersNoReceiptSoapOut">
+    <wsdl:part name="parameters" element="UpdateOrdersNoReceiptResponse"/>
+  </wsdl:message>
+  <wsdl:message name="UpdateOrdersNoReceiptExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="GetOrderDetailsSoapIn">
+    <wsdl:part name="parameters" element="GetOrderDetails"/>
+  </wsdl:message>
+  <wsdl:message name="GetOrderDetailsSoapOut">
+    <wsdl:part name="parameters" element="GetOrderDetailsResponse"/>
+  </wsdl:message>
+  <wsdl:message name="GetOrderDetailsExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="ChangePasswordSoapIn">
+    <wsdl:part name="parameters" element="ChangePassword"/>
+  </wsdl:message>
+  <wsdl:message name="ChangePasswordSoapOut">
+    <wsdl:part name="parameters" element="ChangePasswordResponse"/>
+  </wsdl:message>
+  <wsdl:message name="ChangePasswordExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="ListMarketWithdrawalHistorySoapIn">
+    <wsdl:part name="parameters" element="ListMarketWithdrawalHistory"/>
+  </wsdl:message>
+  <wsdl:message name="ListMarketWithdrawalHistorySoapOut">
+    <wsdl:part name="parameters" element="ListMarketWithdrawalHistoryResponse"/>
+  </wsdl:message>
+  <wsdl:message name="ListMarketWithdrawalHistoryExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="GetPricesSoapIn">
+    <wsdl:part name="parameters" element="GetPrices"/>
+  </wsdl:message>
+  <wsdl:message name="GetPricesSoapOut">
+    <wsdl:part name="parameters" element="GetPricesResponse"/>
+  </wsdl:message>
+  <wsdl:message name="GetPricesExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="SuspendFromTradingSoapIn">
+    <wsdl:part name="parameters" element="SuspendFromTrading"/>
+  </wsdl:message>
+  <wsdl:message name="SuspendFromTradingSoapOut">
+    <wsdl:part name="parameters" element="SuspendFromTradingResponse"/>
+  </wsdl:message>
+  <wsdl:message name="SuspendFromTradingExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="UnsuspendFromTradingSoapIn">
+    <wsdl:part name="parameters" element="UnsuspendFromTrading"/>
+  </wsdl:message>
+  <wsdl:message name="UnsuspendFromTradingSoapOut">
+    <wsdl:part name="parameters" element="UnsuspendFromTradingResponse"/>
+  </wsdl:message>
+  <wsdl:message name="UnsuspendFromTradingExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="SuspendOrdersSoapIn">
+    <wsdl:part name="parameters" element="SuspendOrders"/>
+  </wsdl:message>
+  <wsdl:message name="SuspendOrdersSoapOut">
+    <wsdl:part name="parameters" element="SuspendOrdersResponse"/>
+  </wsdl:message>
+  <wsdl:message name="SuspendOrdersExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+
+  <wsdl:message name="SuspendAllOrdersOnMarketSoapIn">
+    <wsdl:part name="parameters" element="SuspendAllOrdersOnMarket"/>
+  </wsdl:message>
+  <wsdl:message name="SuspendAllOrdersOnMarketSoapOut">
+    <wsdl:part name="parameters" element="SuspendAllOrdersOnMarketResponse"/>
+  </wsdl:message>
+  <wsdl:message name="SuspendAllOrdersOnMarketExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+
+  <wsdl:message name="UnsuspendOrdersSoapIn">
+    <wsdl:part name="parameters" element="UnsuspendOrders"/>
+  </wsdl:message>
+  <wsdl:message name="UnsuspendOrdersSoapOut">
+    <wsdl:part name="parameters" element="UnsuspendOrdersResponse"/>
+  </wsdl:message>
+  <wsdl:message name="UnsuspendOrdersExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="SuspendAllOrdersSoapIn">
+    <wsdl:part name="parameters" element="SuspendAllOrders"/>
+  </wsdl:message>
+  <wsdl:message name="SuspendAllOrdersSoapOut">
+    <wsdl:part name="parameters" element="SuspendAllOrdersResponse"/>
+  </wsdl:message>
+  <wsdl:message name="SuspendAllOrdersExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="ListBlacklistInformationSoapIn">
+    <wsdl:part name="parameters" element="ListBlacklistInformation"/>
+  </wsdl:message>
+  <wsdl:message name="ListBlacklistInformationSoapOut">
+    <wsdl:part name="parameters" element="ListBlacklistInformationResponse"/>
+  </wsdl:message>
+  <wsdl:message name="ListBlacklistInformationExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+  <wsdl:message name="RegisterHeartbeatSoapIn">
+    <wsdl:part name="parameters" element="RegisterHeartbeat"/>
+  </wsdl:message>
+  <wsdl:message name="RegisterHeartbeatSoapOut">
+    <wsdl:part name="parameters" element="RegisterHeartbeatResponse"/>
+  </wsdl:message>
+  <wsdl:message name="RegisterHeartbeatExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+
+  <wsdl:message name="ChangeHeartbeatRegistrationSoapIn">
+    <wsdl:part name="parameters" element="ChangeHeartbeatRegistration"/>
+  </wsdl:message>
+  <wsdl:message name="ChangeHeartbeatRegistrationSoapOut">
+    <wsdl:part name="parameters" element="ChangeHeartbeatRegistrationResponse"/>
+  </wsdl:message>
+  <wsdl:message name="ChangeHeartbeatRegistrationExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+
+  <wsdl:message name="DeregisterHeartbeatSoapIn">
+    <wsdl:part name="parameters" element="DeregisterHeartbeat"/>
+  </wsdl:message>
+  <wsdl:message name="DeregisterHeartbeatSoapOut">
+    <wsdl:part name="parameters" element="DeregisterHeartbeatResponse"/>
+  </wsdl:message>
+  <wsdl:message name="DeregisterHeartbeatExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+
+  <wsdl:message name="PulseSoapIn">
+    <wsdl:part name="parameters" element="Pulse"/>
+  </wsdl:message>
+  <wsdl:message name="PulseSoapOut">
+    <wsdl:part name="parameters" element="PulseResponse"/>
+  </wsdl:message>
+  <wsdl:message name="PulseExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+
+  <wsdl:message name="GetOddsLadderSoapIn">
+    <wsdl:part name="parameters" element="GetOddsLadder"/>
+  </wsdl:message>
+  <wsdl:message name="GetOddsLadderSoapOut">
+    <wsdl:part name="parameters" element="GetOddsLadderResponse"/>
+  </wsdl:message>
+  <wsdl:message name="GetOddsLadderExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+
+  <wsdl:message name="GetCurrentSelectionSequenceNumberSoapIn">
+    <wsdl:part name="parameters" element="GetCurrentSelectionSequenceNumber"/>
+  </wsdl:message>
+  <wsdl:message name="GetCurrentSelectionSequenceNumberSoapOut">
+    <wsdl:part name="parameters" element="GetCurrentSelectionSequenceNumberResponse"/>
+  </wsdl:message>
+  <wsdl:message name="GetCurrentSelectionSequenceNumberExternalApiHeader">
+    <wsdl:part name="ExternalApiHeader" element="ExternalApiHeader"/>
+  </wsdl:message>
+
+
+
+  <wsdl:portType name="ReadOnlyService">
+
+    <wsdl:operation name="ListSelectionsChangedSince">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns the selections with a sequence number greater than the sequence number provided.</documentation>
+      <wsdl:input message="ListSelectionsChangedSinceSoapIn"/>
+      <wsdl:output message="ListSelectionsChangedSinceSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="ListTopLevelEvents">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns the set of top level events that are currently active.</documentation>
+      <wsdl:input message="ListTopLevelEventsSoapIn"/>
+      <wsdl:output message="ListTopLevelEventsSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetEventSubTreeWithSelections">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns the tree of events and markets.</documentation>
+      <wsdl:input message="GetEventSubTreeWithSelectionsSoapIn"/>
+      <wsdl:output message="GetEventSubTreeWithSelectionsSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetEventSubTreeNoSelections">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns the tree of events and markets.</documentation>
+      <wsdl:input message="GetEventSubTreeNoSelectionsSoapIn"/>
+      <wsdl:output message="GetEventSubTreeNoSelectionsSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetMarketInformation">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns the tree of events and markets.</documentation>
+      <wsdl:input message="GetMarketInformationSoapIn"/>
+      <wsdl:output message="GetMarketInformationSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="ListMarketWithdrawalHistory">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns history of withdrawals for a given market.</documentation>
+      <wsdl:input message="ListMarketWithdrawalHistorySoapIn"/>
+      <wsdl:output message="ListMarketWithdrawalHistorySoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetPrices">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns the prices for the specified markets.</documentation>
+      <wsdl:input message="GetPricesSoapIn"/>
+      <wsdl:output message="GetPricesSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetOddsLadder">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns the current odds ladder in requested price format."</documentation>
+      <wsdl:input message="GetOddsLadderSoapIn"/>
+      <wsdl:output message="GetOddsLadderSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrentSelectionSequenceNumber">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Returns the maximum selection sequence number.</wsdl:documentation>
+      <wsdl:input message="GetCurrentSelectionSequenceNumberSoapIn"/>
+      <wsdl:output message="GetCurrentSelectionSequenceNumberSoapOut"/>
+    </wsdl:operation>
+
+  </wsdl:portType>
+  <wsdl:binding name="ReadOnlyService" type="ReadOnlyService">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+    <wsdl:operation name="ListTopLevelEvents">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/ListTopLevelEvents" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="ListTopLevelEventsExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetEventSubTreeWithSelections">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/GetEventSubTreeWithSelections" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="GetEventSubTreeWithSelectionsExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetEventSubTreeNoSelections">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/GetEventSubTreeNoSelections" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="GetEventSubTreeNoSelectionsExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetMarketInformation">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/GetMarketInformation" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="GetMarketInformationExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListMarketWithdrawalHistory">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/ListMarketWithdrawalHistory" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="ListMarketWithdrawalHistoryExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetPrices">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/GetPrices" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="GetPricesExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListSelectionsChangedSince">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/ListSelectionsChangedSince" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="ListSelectionsChangedSinceExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetOddsLadder">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/GetOddsLadder" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="GetOddsLadderExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrentSelectionSequenceNumber">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/GetCurrentSelectionSequenceNumber" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="GetCurrentSelectionSequenceNumberExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:portType name="SecureService">
+    <wsdl:operation name="ListBootstrapOrders">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns bootstrap orders that have a sequence number greater than the sequence number specified.</documentation>
+      <wsdl:input message="ListBootstrapOrdersSoapIn"/>
+      <wsdl:output message="ListBootstrapOrdersSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="ListOrdersChangedSince">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns a list of orders that have changed since a given sequence number.</documentation>
+      <wsdl:input message="ListOrdersChangedSinceSoapIn"/>
+      <wsdl:output message="ListOrdersChangedSinceSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="PlaceOrdersNoReceipt">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Places one or more orders on the exchange.</documentation>
+      <wsdl:input message="PlaceOrdersNoReceiptSoapIn"/>
+      <wsdl:output message="PlaceOrdersNoReceiptSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="PlaceOrdersWithReceipt">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Places one or more orders on the exchange and waits for response from exchange.</documentation>
+      <wsdl:input message="PlaceOrdersWithReceiptSoapIn"/>
+      <wsdl:output message="PlaceOrdersWithReceiptSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="CancelOrders">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Cancels one or more orders on the exchange.</documentation>
+      <wsdl:input message="CancelOrdersSoapIn"/>
+      <wsdl:output message="CancelOrdersSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="CancelAllOrders">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Cancels all unmatched orders across all markets.</documentation>
+      <wsdl:input message="CancelAllOrdersSoapIn"/>
+      <wsdl:output message="CancelAllOrdersSoapOut"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="CancelAllOrdersOnMarket">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Cancels all unmatched orders for specified markets.</documentation>
+      <wsdl:input message="CancelAllOrdersOnMarketSoapIn"/>
+      <wsdl:output message="CancelAllOrdersOnMarketSoapOut"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="GetAccountBalances">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns an account summary for the current punter.</documentation>
+      <wsdl:input message="GetAccountBalancesSoapIn"/>
+      <wsdl:output message="GetAccountBalancesSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="ListAccountPostings">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns an account summary and details of orders placed for the current punter.</documentation>
+      <wsdl:input message="ListAccountPostingsSoapIn"/>
+      <wsdl:output message="ListAccountPostingsSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="ListAccountPostingsById">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Returns an account summary and details of orders placed for the current punter.</documentation>
+      <wsdl:input message="ListAccountPostingsByIdSoapIn"/>
+      <wsdl:output message="ListAccountPostingsByIdSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateOrdersNoReceipt">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Updates one or more orders on the exchange without waiting for a response.</documentation>
+      <wsdl:input message="UpdateOrdersNoReceiptSoapIn"/>
+      <wsdl:output message="UpdateOrdersNoReceiptSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="GetOrderDetails">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Gets detailed information about an order.</documentation>
+      <wsdl:input message="GetOrderDetailsSoapIn"/>
+      <wsdl:output message="GetOrderDetailsSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="ChangePassword">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Change password on the current account.</documentation>
+      <wsdl:input message="ChangePasswordSoapIn"/>
+      <wsdl:output message="ChangePasswordSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="SuspendFromTrading">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Suspend any of your orders from being matched.</documentation>
+      <wsdl:input message="SuspendFromTradingSoapIn"/>
+      <wsdl:output message="SuspendFromTradingSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="UnsuspendFromTrading">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Unsuspend yourself from being suspending from trading.</documentation>
+      <wsdl:input message="UnsuspendFromTradingSoapIn"/>
+      <wsdl:output message="UnsuspendFromTradingSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="SuspendOrders">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Suspends one or more Orders.</documentation>
+      <wsdl:input message="SuspendOrdersSoapIn"/>
+      <wsdl:output message="SuspendOrdersSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="SuspendAllOrdersOnMarket">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Suspends all unmatched orders on a market.</documentation>
+      <wsdl:input message="SuspendAllOrdersOnMarketSoapIn"/>
+      <wsdl:output message="SuspendAllOrdersOnMarketSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="UnsuspendOrders">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Unsuspends one or more suspended Orders.</documentation>
+      <wsdl:input message="UnsuspendOrdersSoapIn"/>
+      <wsdl:output message="UnsuspendOrdersSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="SuspendAllOrders">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Suspends one or more Orders.</documentation>
+      <wsdl:input message="SuspendAllOrdersSoapIn"/>
+      <wsdl:output message="SuspendAllOrdersSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="ListBlacklistInformation">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">List blacklist information of the current punter.</documentation>
+      <wsdl:input message="ListBlacklistInformationSoapIn"/>
+      <wsdl:output message="ListBlacklistInformationSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="RegisterHeartbeat">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Register HeartBeat.</documentation>
+      <wsdl:input message="RegisterHeartbeatSoapIn"/>
+      <wsdl:output message="RegisterHeartbeatSoapOut"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="ChangeHeartbeatRegistration">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Change HeartBeat registration.</documentation>
+      <wsdl:input message="ChangeHeartbeatRegistrationSoapIn"/>
+      <wsdl:output message="ChangeHeartbeatRegistrationSoapOut"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="DeregisterHeartbeat">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Deteles HeartBeat registration.</documentation>
+      <wsdl:input message="DeregisterHeartbeatSoapIn"/>
+      <wsdl:output message="DeregisterHeartbeatSoapOut"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="Pulse">
+      <documentation xmlns="http://schemas.xmlsoap.org/wsdl/">Pulse.</documentation>
+      <wsdl:input message="PulseSoapIn"/>
+      <wsdl:output message="PulseSoapOut"/>
+    </wsdl:operation>
+
+  </wsdl:portType>
+  <wsdl:binding name="SecureService" type="SecureService">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+    <wsdl:operation name="ListOrdersChangedSince">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/ListOrdersChangedSince" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="ListOrdersChangedSinceExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PlaceOrdersNoReceipt">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/PlaceOrdersNoReceipt" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="PlaceOrdersNoReceiptExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PlaceOrdersWithReceipt">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/PlaceOrdersWithReceipt" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="PlaceOrdersWithReceiptExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelOrders">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/CancelOrders" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="CancelOrdersExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelAllOrders">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/CancelAllOrders" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="CancelAllOrdersExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+
+    <wsdl:operation name="CancelAllOrdersOnMarket">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/CancelAllOrdersOnMarket" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="CancelAllOrdersOnMarketExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+
+    <wsdl:operation name="GetAccountBalances">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/GetAccountBalances" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="GetAccountBalancesExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListAccountPostings">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/ListAccountPostings" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="ListAccountPostingsExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListAccountPostingsById">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/ListAccountPostingsById" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="ListAccountPostingsByIdExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateOrdersNoReceipt">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/UpdateOrdersNoReceipt" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="UpdateOrdersNoReceiptExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetOrderDetails">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/GetOrderDetails" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="GetOrderDetailsExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ChangePassword">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/ChangePassword" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="ChangePasswordExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+
+    <wsdl:operation name="ListBootstrapOrders">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/ListBootstrapOrders" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="ListBootstrapOrdersExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SuspendFromTrading">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/SuspendFromTrading" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="SuspendFromTradingExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UnsuspendFromTrading">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/UnsuspendFromTrading" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="UnsuspendFromTradingExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SuspendOrders">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/SuspendOrders" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="SuspendOrdersExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+
+    <wsdl:operation name="SuspendAllOrdersOnMarket">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/SuspendAllOrdersOnMarket" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="SuspendAllOrdersOnMarketExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+
+    <wsdl:operation name="UnsuspendOrders">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/UnsuspendOrders" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="UnsuspendOrdersExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SuspendAllOrders">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/SuspendAllOrders" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="SuspendAllOrdersExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+
+    <wsdl:operation name="ListBlacklistInformation">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/ListBlacklistInformation" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal" wsdl:required="false"/>
+        <soap:header message="ListBlacklistInformationExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RegisterHeartbeat">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/RegisterHeartbeat" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="RegisterHeartbeatExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+
+    <wsdl:operation name="ChangeHeartbeatRegistration">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/ChangeHeartbeatRegistration" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="ChangeHeartbeatRegistrationExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+
+    <wsdl:operation name="DeregisterHeartbeat">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/DeregisterHeartbeat" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="DeregisterHeartbeatExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+
+    <wsdl:operation name="Pulse">
+      <soap:operation soapAction="http://www.GlobalBettingExchange.com/ExternalAPI/Pulse" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+        <soap:header message="PulseExternalApiHeader" part="ExternalApiHeader" use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ReadOnlyService">
+    <documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+    <wsdl:port name="ReadOnlyService" binding="ReadOnlyService">
+      <soap:address location="http://api.betdaq.com/v2.0/ReadOnlyService.asmx"/>
+    </wsdl:port>
+  </wsdl:service>
+  <wsdl:service name="SecureService">
+    <documentation xmlns="http://schemas.xmlsoap.org/wsdl/"/>
+    <wsdl:port name="SecureService" binding="SecureService">
+      <soap:address location="https://api.betdaq.com/v2.0/Secure/SecureService.asmx"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
