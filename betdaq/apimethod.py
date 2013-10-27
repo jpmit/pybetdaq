@@ -2,7 +2,11 @@
 # James Mithen
 # jamesmithen@gmail.com
 
-"""Classes for calling the Betdaq Api Methods."""
+"""
+Classes for calling the Betdaq Api Methods.  These are not designed to
+be called from user applications directly; rather, use the interface
+in betdaq.py by calling e.g. betdaq.ListTopLevelEvents().
+"""
 
 import datetime
 import time
@@ -23,6 +27,7 @@ class ApiMethod(object):
 
     def call(self):
         """Call the Api function and return the appropriate data."""
+        pass
 
 # classes that implement the read only methods, in the order that they
 # appear in the Betdaq documentation 'NewExternalApispec.doc'.
@@ -33,12 +38,14 @@ class ApiListTopLevelEvents(ApiMethod):
         self.create_req()
 
     def create_req(self):
-        self.req = self.client.factory.create('ListTopLevelEventsRequest')
+        self.req = self.client.factory.\
+                   create('ListTopLevelEventsRequest')
         # this is the default, and I don't exactly know why we would
         # want True anyway, but lets set it just in case.
         self.req._WantPlayMarkets = False
         
     def call(self):
+        """Return list of events."""
         apilog.info('calling BDAQ Api ListTopLevelEvents')
         response = self.client.service.ListTopLevelEvents(self.req)
         events = apiparse.ParseListTopLevelEvents(response)
@@ -46,7 +53,8 @@ class ApiListTopLevelEvents(ApiMethod):
                 
 class ApiGetEventSubTreeNoSelections(ApiMethod):
     def __init__(self, apiclient):
-        super(ApiGetEventSubTreeNoSelections, self).__init__(apiclient)
+        super(ApiGetEventSubTreeNoSelections,
+              self).__init__(apiclient)
         self.create_req()
 
     def create_req(self):
@@ -55,29 +63,41 @@ class ApiGetEventSubTreeNoSelections(ApiMethod):
         # may want to change this sometime (?)
         self.req._WantPlayMarkets = False
 
-    def call(self, ids, direct=False):
+    def call(self, ids, direct = False):
+        """
+        Return list of markets for events. ids should be a list of
+        event ids e.g. calling with ids = [100004, 100005] will give
+        all markets for 'Horse Racing' and 'Tennis'.
+        """
+        
         self.req.EventClassifierIds = ids
         self.req._WantDirectDescendentsOnly = direct
+        self.req._WantPlayMarkets = False
         apilog.info('calling BDAQ Api GetEventSubTreeNoSelections')        
-        response = self.client.service.GetEventSubTreeNoSelections(self.req)
+        response = self.client.service.\
+                   GetEventSubTreeNoSelections(self.req)
         allmarkets = apiparse.ParseGetEventSubTreeNoSelections(response)
         return allmarkets
 
 # not fully implemented (do not use)
 class ApiGetEventSubTreeWithSelections(ApiMethod):
     def __init__(self, apiclient):
-        super(ApiGetEventSubTreeWithSelections, self).__init__(apiclient)        
+        super(ApiGetEventSubTreeWithSelections,
+              self).__init__(apiclient)
+        
         self.create_req()
 
     def create_req(self):
-        self.req = self.client.factory.create('GetEventSubTreeWithSelectionsRequest')
+        self.req = self.client.factory.\
+                   create('GetEventSubTreeWithSelectionsRequest')
         # note that for this function (unlike NoSelections), can only
         # go down one level i.e. can only get 'direct descendants'
         self.req._WantPlayMarkets = False
 
     def call(self, ids):
         self.req.EventClassifierIds = ids
-        result = self.client.service.GetEventSubTreeWithSelections(self.req)
+        result = self.client.service.\
+                 GetEventSubTreeWithSelections(self.req)
         return result
 
 class ApiGetMarketInformation(ApiMethod):
@@ -86,9 +106,17 @@ class ApiGetMarketInformation(ApiMethod):
         self.create_req()
 
     def create_req(self):
-        self.req = self.client.factory.create('GetMarketInformationRequest')
+        self.req = self.client.factory.\
+                   create('GetMarketInformationRequest')
 
     def call(self, ids):
+        """
+        Return raw data of all market information.  Note that at the
+        moment there is no 'MarketInfo' type class that contains this
+        information.  Part of the reason for this is that this API
+        function should not be required frequently.
+        """
+
         self.req.MarketIds = ids
         result = self.client.service.GetMarketInformation(self.req)
         # note the raw data is returned here
@@ -97,15 +125,18 @@ class ApiGetMarketInformation(ApiMethod):
 # not fully implemented (do not use)
 class ApiListSelectionsChangedSince(ApiMethod):
     def __init__(self, apiclient):
-        super(ApiListSelectionsChangedSince, self).__init__(apiclient)            
+        super(ApiListSelectionsChangedSince, self).__init__(apiclient)
+        
         self.create_req()
 
     def create_req(self):
-        self.req = self.client.factory.create('ListSelectionsChangedSinceRequest')
+        self.req = self.client.factory.\
+                   create('ListSelectionsChangedSinceRequest')
 
     def call(self, seqnum):
         self.req._SelectionSequenceNumber = seqnum
-        result = self.client.service.ListSelectionsChangedSince(self.req)
+        result = self.client.service.\
+                 ListSelectionsChangedSince(self.req)
         return result
 
 # not fully implemented (do not use)
@@ -120,11 +151,15 @@ class ApiListMarketWithdrawalHistory(ApiMethod):
 
     def call(self, ids):
         self.req.MarketId = ids
-        result = self.client.service.ListMarketWithdrawalHistory(self.req)
+        result = self.client.service.\
+                 ListMarketWithdrawalHistory(self.req)
         return result
 
 class ApiGetPrices(ApiMethod):
-    def __init__(self, apiclient, throttl=0):
+    # maximum number of market ids we get get selection prices for in
+    # a single API call (Set to 50 according to the API docs).
+    MAXMIDS = 50 
+    def __init__(self, apiclient, throttl = 0):
         super(ApiGetPrices, self).__init__(apiclient) 
         # time to wait between consecutive calls when calling multiple
         # times.
@@ -143,19 +178,23 @@ class ApiGetPrices(ApiMethod):
         self.req._WantSelectionMatchedDetails = True
 
     def call(self, mids):
-        """mids should be list of market ids."""
-        
-        MAXMIDS = 50 # set by BDAQ Api
+        """
+        Return all selections for Market ids in mids, where mids is a
+        list of market ids.
+        """
+
         allselections = []
         # split up mids into groups of size MAXMIDS
-        for (callnum, ids) in enumerate(util.chunks(mids, MAXMIDS)):
+        for (callnum, ids) in \
+            enumerate(util.chunks(mids, ApiGetPrices.MAXMIDS)):
             self.req.MarketIds = ids
             if callnum > 0:
                 # sleep for some time before calling Api again
                 time.sleep(self.throttl)
-            betlog.betlog.info('calling BDAQ Api GetPrices')        
+                
+            apilog.info('calling BDAQ Api GetPrices')        
             result = self.client.service.GetPrices(self.req)
-            selections =  bdaqapiparse.ParsePrices(ids, result)
+            selections =  apiparse.ParsePrices(ids, result)
             allselections = allselections + selections
 
         return allselections
@@ -171,7 +210,8 @@ class ApiGetCurrentSelectionSequenceNumber(ApiMethod):
               self).__init__(apiclient)         
 
     def call(self):
-        result = self.client.service.GetCurrentSelectionSequenceNumber()
+        result = self.client.service.\
+                 GetCurrentSelectionSequenceNumber()
         return result
 
 # classes that implement the secure methods, in the order that they
@@ -198,7 +238,8 @@ class ApiListAccountPostings(ApiMethod):
         self.create_req()
 
     def create_req(self):
-        self.req = self.client.factory.create('ListAccountPostingsRequest')
+        self.req = self.client.factory.\
+                   create('ListAccountPostingsRequest')
 
     def call(self, *args):
         # should be able to pass two datetime objects here(?)
@@ -229,7 +270,8 @@ class ApiListOrdersChangedSince(ApiMethod):
         self.create_req()
 
     def create_req(self):
-        self.req = self.client.factory.create('ListOrdersChangedSinceRequest')
+        self.req = self.client.factory.\
+                   create('ListOrdersChangedSinceRequest')
 
     def call(self, seqnum=None):
         global ORDER_SEQUENCE_NUMBER
@@ -274,8 +316,10 @@ class ApiListBootstrapOrders(ApiMethod):
         self.create_req()
 
     def create_req(self):
-        self.req = self.client.factory.create('ListBootstrapOrdersRequest')
-        # this is probably the best default here (see BDAQ documentation)
+        self.req = self.client.factory.\
+                   create('ListBootstrapOrdersRequest')
+        # this is probably the best default here (see BDAQ
+        # documentation).
         self.req.wantSettledOrdersOnUnsettledMarkets = False
 
     def call(self, snum=-1):
@@ -289,7 +333,8 @@ class ApiListBootstrapOrders(ApiMethod):
         ORDER_SEQUENCE_NUMBER = result._MaximumSequenceNumber
         allorders = bdaqapiparse.ParseListBootstrapOrders(result)
         if const.WRITEDB:
-            self.dbman.WriteOrders(allorders.values(), result.Timestamp)
+            self.dbman.WriteOrders(allorders.values(),
+                                   result.Timestamp)
         return allorders
 
 # not fully implemented (do not use)

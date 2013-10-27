@@ -13,8 +13,9 @@ PRICETHROTTLE = 10
 
 # create suds clients.  There is only 1 WSDL file, but this has two
 # 'services'.  The services are for 'readonly' methods and 'secure'
-# methods. Secure methods use an https:// url and send the password,
-# read-only methods use http:// and do not send the password.
+# methods. Secure methods use an https:// url and require the user's
+# Betdaq username and password in the SOAP headers, read-only methods use http://
+# and only require username.
 rcl = apiclient.ApiClient('readonly')
 scl = apiclient.ApiClient('secure')
 

@@ -2,7 +2,7 @@
 # James Mithen
 # jamesmithen@gmail.com
 
-"""Event, Market and Selection objects"""
+"""Event, Market, Selection and Order objects."""
 
 import const
 import exchangedata
@@ -10,7 +10,7 @@ import exchangedata
 class Event(object):
     """A top level event e.g. 'Rugby Union'."""
     def __init__(self, name, myid, **kwargs):
-        # convert name to ascii string and ignore any funky unicode
+        # convert name to ascii string i.e. ignore any funky unicode
         # characters
         self.name = name.encode('ascii', 'ignore')
         self.id = myid
@@ -25,8 +25,8 @@ class Event(object):
         return self.__repr__()
 
 class Market(object):
-    """A market"""
-    def __init__(self, name, myid, pid, inrunning, pname=None):
+    """A market."""
+    def __init__(self, name, myid, pid, inrunning, **kwargs):
         # convert name to ascii string and ignore any funky unicode
         # characters
         self.name = name.encode('ascii', 'ignore')
@@ -35,9 +35,11 @@ class Market(object):
         self.id = myid
         # parent id
         self.pid = pid
-        self.pname = pname
         # is the market 'in running?'
         self.inrunning = inrunning
+
+        # store all information that comes from the API
+        self.properties = kwargs
 
     def __repr__(self):
         return ' '.join([self.name, str(self.id)])
@@ -46,16 +48,15 @@ class Market(object):
         return self.__repr__()
 
 class Selection(object):
-    """A selection"""
-    def __init__(self, name, myid, marketid, mback, mlay, lastmatched,
+    """A selection."""
+    def __init__(self, name, sid, marketid, mback, mlay, lastmatched,
                  lastmatchedprice, lastmatchedamount, backprices,
-                 layprices, src=None, wsn=None):
-        self.exid = exid
-        # store everything from BDAQ API below
-        # convert name to ascii string and ignore any funky unicode
-        # characters
+                 layprices, src, wsn, **kwargs):
+
+        # convert name to ascii string, i.e. ignore any funky unicode
+        # characters.
         self.name = name.encode('ascii', 'ignore')        
-        self.id = myid # selection id
+        self.id = sid # selection id
         self.mid = marketid # market id I belong to
         self.matchedback = mback        
         self.matchedlay = mlay        
@@ -63,10 +64,12 @@ class Selection(object):
         self.lastmatchedprice = lastmatchedprice
         self.lastmatchedamount = lastmatchedamount
 
-        # selection reset count and withdrawal selection number are
-        # for BDAQ only
+        # selection reset count and withdrawal selection number
         self.src = src
         self.wsn = wsn
+
+        # store all data from API
+        self.properties = kwargs
 
         # list of prices and stakes [(p1,s1), (p2,s2) ...,]
         self.backprices = backprices
@@ -77,8 +80,9 @@ class Selection(object):
         self.padlay = self.PadPrices(layprices, const.NUMPRICES)
 
     def PadPrices(self, prices, num):
-        """Pad prices so that if have fewer than num back or lay
-        prices"""
+        """
+        Pad prices so that if have fewer than num back or lay prices.
+        """
         nprices = len(prices)
         if nprices == num:
             return prices
@@ -101,13 +105,15 @@ class Selection(object):
                    self.padlay[0][0])
 
     def make_best_lay(self):
-        """Return price for if we wanted to make a market on selection
+        """
+        Return price for if we wanted to make a market on selection
         and be the best price on offer to lay.  E.g. if exchange is BF
-        and best lay price is 21, this will return 20"""
+        and best lay price is 21, this will return 20.
+        """
         
         blay = self.best_lay()
 
-        # design option: if the best back price is 1, we could return
+        # design choice: if the best back price is 1, we could return
         # None, but instead lets return 1.
         if blay == exchangedata.MINODDS:
             return exchangedata.MINODDS
@@ -115,13 +121,15 @@ class Selection(object):
         return exchangedata.next_shorter_odds(self.exid, blay)
 
     def make_best_back(self):
-        """Return price for if we wanted to make a market on selection
+        """
+        Return price for if we wanted to make a market on selection
         and be the best price on offer to back E.g. if exchange is BF
-        and best back price is 21, this will return 22."""
+        and best back price is 21, this will return 22.
+        """
 
         bback = self.best_back()
 
-        # design option: if the best lay price is 1000, we could
+        # design choice: if the best lay price is 1000, we could
         # return None, but instead lets return 1000.
         if bback == exchangedata.MAXODDS:
             return exchangedata.MAXODDS

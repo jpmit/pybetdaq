@@ -19,6 +19,62 @@ def ParseListTopLevelEvents(resp):
         events.append(Event(ec._Name, ec._Id, **dict(ec)))
     return events
 
+def ParseGetEventSubTreeNoSelections(resp):
+    # first thing is return status
+    # return code below should be zero if successful
+    retcode = resp.ReturnStatus._Code
+    tstamp = resp.Timestamp    
+    # check the Return Status is zero (success)
+    # and not:
+    # 5   - event classifier does not exist
+    # 137 - maximuminputrecordsexceeded
+    # 406 - punter blacklisted
+    if retcode == 406:
+        raise ApiError, 'punter is blacklisted'
+    
+    allmarkets = []
+    markets = []
+    # go through each event class in turn, an event class is
+    # e.g. 'Rugby Union','Formula 1', etc.
+    # slight trick here:
+    # if we only polled a single event class, then resp[2] is
+    # not a list, so we need to convert it to a list
+    if isinstance(resp[2], list):
+        data = resp[2]
+    else:
+        data = [resp[2]]
+    for evclass in data:
+        _ParseEventClassifier(evclass,'', markets)
+        allmarkets = allmarkets + markets
+    # hack: currently markets are duplicated multiple times (is this
+    # an API error?); we want only unique markets here
+    umarkets = util.unique(allmarkets)
+    return umarkets
+
+def _ParseEventClassifier(eclass, name='', markets=[]):
+    """
+    Get Markets from a Top Level Event, e.g. 'Rugby Union'.
+    Note that we skip a level here, e.g. We would go Rugby ->
+    Lions Tour -> market, but here we will just find all rugby
+    union markets, regardless of their direct ancester.
+    """
+
+    name = name + '|' + eclass._Name
+    pid = eclass._ParentId
+    myid = eclass._Id
+
+    if hasattr(eclass, 'EventClassifiers'):
+        for e in eclass.EventClassifiers:
+            _ParseEventClassifier(e, name, markets)
+    else:
+        if hasattr(eclass, 'Markets'):
+            for mtype in eclass.Markets:
+                markets.append(Market(name + '|' + mtype._Name,
+                                      mtype._Id,
+                                      pid,
+                                      mtype._IsCurrentlyInRunning,
+                                      **dict(mtype)))
+
 def ParseListBootstrapOrders(resp):
     """
     Parse a single order, return order object.  Note there are a few
@@ -102,6 +158,10 @@ def ParsePrices(marketids, resp):
     if retcode == 406:
         raise ApiError, 'punter is blacklisted'
 
+    # if we only called with a single market id, we won't have a list
+    if len(marketids) == 1:
+        resp.MarketPrices = [resp.MarketPrices]
+        
     # check market prices is right length
     assert len(resp.MarketPrices) == len(marketids)
 
@@ -109,17 +169,25 @@ def ParsePrices(marketids, resp):
     for (mid, mprice) in zip(marketids, resp.MarketPrices):
         # list of selections for this marketid
         allselections.append([])
-        # go through each selection for the market
-        # for some reason the Api is returning every selection
-        # twice, although this could be an error with the SOAP
-        # library.
+        # go through each selection for the market.  For some reason
+        # the Api is returning every selection twice, although this
+        # could be an error with the SOAP library (?).
 
         # are there any selections?
         if not hasattr(mprice,'Selections'):
             # can reach here if market suspended
             break
-        # double listing problem
-        nsel = len(mprice.Selections) / 2
+        
+        nsel = len(mprice.Selections)
+
+        # we store the market withdrawal sequence number in every
+        # selection instance, since this is needed to place a bet on
+        # the selection.  This is mainly important for horse racing
+        # markets, for which there are often withdrawals before the
+        # race (i.e. horses that do not run), which in turn makes this
+        # sequence number non-zero.  For other markets, the sequence
+        # number is usually zero.
+        wsn = mprice._WithdrawalSequenceNumber
 
         for sel in mprice.Selections[:nsel]:
             # lists of back and lay prices
@@ -151,6 +219,7 @@ def ParsePrices(marketids, resp):
             # create selection object using given data
             # we need to handle the case of no matches yet, since in
             # this case the response is missing certain fields.
+            print sel
             if not (sel._MatchedSelectionForStake or
                     sel._MatchedSelectionAgainstStake):
                 lastmatchoccur = None
@@ -160,67 +229,18 @@ def ParsePrices(marketids, resp):
                 lastmatchoccur = sel._LastMatchedOccurredAt
                 lastmatchprice = sel._LastMatchedPrice
                 lastmatchamount = sel._LastMatchedForSideAmount
+            # the only data directly concerning the selection that we
+            # are not storing in the selection instance is the
+            # 'deduction factor'.
             allselections[-1].append(Selection(sel._Name, sel._Id, mid,
                                                sel._MatchedSelectionForStake,
                                                sel._MatchedSelectionAgainstStake,
                                                lastmatchoccur,
                                                lastmatchprice,
                                                lastmatchamount,
-                                               bprices, lprices))
+                                               bprices, lprices,
+                                               sel._ResetCount, wsn, **dict(sel)))
     return allselections
-
-def ParseGetEventSubTreeNoSelections(resp):
-    # first thing is return status
-    # return code below should be zero if successful
-    retcode = resp.ReturnStatus._Code
-    tstamp = resp.Timestamp    
-    # check the Return Status is zero (success)
-    # and not:
-    # 5 - event classifier does not exist
-    # 137 - maximuminputrecordsexceeded
-    # 406 - punter blacklisted
-    if retcode == 406:
-        raise ApiError, 'punter is blacklisted'
-    
-    allmarkets = []
-    markets = []
-    # go through each event class in turn, an event class is
-    # e.g. 'Rugby Union','Formula 1', etc.
-    # slight trick here:
-    # if we only polled a single event class, then resp[2] is
-    # not a list, so we need to convert it to a list
-    if isinstance(resp[2], list):
-        data = resp[2]
-    else:
-        data = [resp[2]]
-    for evclass in data:
-        ParseEventClassifier(evclass,'', markets)
-        allmarkets = allmarkets + markets
-    # hack: currently markets are duplicated multiple times; we want
-    # only unique markets here
-    umarkets = util.unique(allmarkets)
-    return umarkets
-
-def ParseEventClassifier(eclass, name='', markets=[]):
-    """Get Markets from a Top Level Event, e.g. 'Rugby Union'.
-    Note that we skip a level here, e.g. We would go Rugby ->
-    Lions Tour -> market, but here we will just find all rugby
-    union markets, regardless of their direct ancester."""
-
-    name = name + '|' + eclass._Name
-    pid = eclass._ParentId
-    myid = eclass._Id
-
-    if hasattr(eclass, 'EventClassifiers'):
-        for e in eclass.EventClassifiers:
-            ParseEventClassifier(e, name, markets)
-    else:
-        if hasattr(eclass, 'Markets'):
-            for mtype in eclass.Markets:
-                markets.append(Market(name + '|' + mtype._Name,
-                                      mtype._Id,
-                                      pid,
-                                      mtype._IsCurrentlyInRunning))
 
 def ParseGetAccountBalances(resp):
     """Returns account balance information by parsing output from BDAQ
