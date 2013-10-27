@@ -1,2 +1,6 @@
 *~
 *.pyc
+backup*
+createzip*
+*.zip
+*.gpg
