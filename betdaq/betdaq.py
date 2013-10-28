@@ -45,4 +45,5 @@ ListBootstrapOrders = apimethod.ApiListBootstrapOrders(scl).call
 ListOrdersChangedSince = apimethod.ApiListOrdersChangedSince(scl).call
 
 # which Api services (hopefully none) am I currently blacklisted from?
-ListBlacklistInformation = apimethod.ApiListBlacklistInformation(scl).call
+ListBlacklistInformation = apimethod.\
+                           ApiListBlacklistInformation(scl).call

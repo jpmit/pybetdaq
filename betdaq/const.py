@@ -11,7 +11,7 @@ import sys
 import os
 
 # version number for this software
-VERSION='0.1'
+VERSION = '0.1'
 
 # print logging information to stdout while running code?  In the
 # library itself, a logging message is printed each time an API
