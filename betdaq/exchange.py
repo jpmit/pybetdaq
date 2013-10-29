@@ -164,8 +164,7 @@ O_LAY = 2
 
 class Order(object):
     """Returned after an order is placed"""
-    def __init__(self, exid, sid, stake, price, polarity, **kwargs):
-        self.exid = exid
+    def __init__(self, sid, stake, price, polarity, **kwargs):
         self.sid = sid
         self.stake = stake
         self.price = price

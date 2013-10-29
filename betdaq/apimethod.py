@@ -431,11 +431,19 @@ class ApiPlaceOrdersWithReceipt(ApiMethod):
         result = self.client.service.PlaceOrdersWithReceipt(self.req)
         return result
 
-# TODO - Updating and cancelling orders
-
 #class ApiUpdateOrdersNoReceipt(ApiMethod):
 
-#class ApiCancelOrders(ApiMethod):
+class ApiCancelOrders(ApiMethod):
+    def __init__(self, apiclient):
+        super(ApiCancelOrders, self).__init__(apiclient)
+        self.create_req()
+
+    def create_req(self):
+        self.req = self.client.factory.create('CancelOrdersRequest')
+
+    def call(self, orderlist):
+        pass
+        return orders
 
 #class ApiCancelAllOrdersOnMarket(ApiMethod):
 
