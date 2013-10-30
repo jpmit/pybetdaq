@@ -16,37 +16,38 @@ PRICETHROTTLE = 10
 # methods. Secure methods use an https:// url and require the user's
 # Betdaq username and password in the SOAP headers, read-only methods use http://
 # and only require username.
-rcl = apiclient.ApiClient('readonly')
-scl = apiclient.ApiClient('secure')
+_rcl = apiclient.ApiClient('readonly')
+_scl = apiclient.ApiClient('secure')
 
 # get all the root events e.g. 'Horse Racing', 'Soccer' etc.
-ListTopLevelEvents = apimethod.ApiListTopLevelEvents(rcl).call
+ListTopLevelEvents = apimethod.ApiListTopLevelEvents(_rcl).call
 
 # get 'subtree' and parse it for markets
 GetEventSubTreeNoSelections = apimethod.\
-                              ApiGetEventSubTreeNoSelections(rcl).call
+                              ApiGetEventSubTreeNoSelections(_rcl).call
 
 # get prices for some market ids
-GetPrices = apimethod.ApiGetPrices(rcl, PRICETHROTTLE).call
+GetPrices = apimethod.ApiGetPrices(_rcl, PRICETHROTTLE).call
 
 # get information for some market ids, e.g. starttime etc.
-GetMarketInformation = apimethod.ApiGetMarketInformation(rcl).call
+GetMarketInformation = apimethod.ApiGetMarketInformation(_rcl).call
 
 # make order(s)
-PlaceOrdersNoReceipt = apimethod.ApiPlaceOrdersNoReceipt(scl).call
+PlaceOrdersNoReceipt = apimethod.ApiPlaceOrdersNoReceipt(_scl).call
 
 # get account information
-GetAccountBalances = apimethod.ApiGetAccountBalances(scl).call
+GetAccountBalances = apimethod.ApiGetAccountBalances(_scl).call
 
 # call ListBootstrapOrders repeatedly at startup
-ListBootstrapOrders = apimethod.ApiListBootstrapOrders(scl).call
+ListBootstrapOrders = apimethod.ApiListBootstrapOrders(_scl).call
 
 # update order status
-ListOrdersChangedSince = apimethod.ApiListOrdersChangedSince(scl).call
+ListOrdersChangedSince = apimethod.ApiListOrdersChangedSince(_scl).call
 
 # cancel orders
-CancelOrders = apimethod.ApiCancelOrders(scl).call
+CancelOrders = apimethod.ApiCancelOrders(_scl).call
 
 # which Api services (hopefully none) am I currently blacklisted from?
 ListBlacklistInformation = apimethod.\
-                           ApiListBlacklistInformation(scl).call
+                           ApiListBlacklistInformation(_scl).call
+
