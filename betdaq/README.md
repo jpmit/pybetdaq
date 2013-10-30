@@ -24,13 +24,13 @@ The library code, which is all written in Python, is contained in the
 betdaq/ directory.  Add the path to this directory to your PYTHONPATH
 environment variable.
 
-To use the library in a Python program, write
+To library can be used in a Python program as follows:
 ```python
 import betdaq
 ```
 
 The Betdaq API functions are then available in the betdaq namespace.
-For example,
+For example:
 ```python
 betdaq.ListTopLevelEvents()
 ```
@@ -40,12 +40,12 @@ event e.g. 'Horse Racing' or 'Soccer'.
 As well as 'Event' objects in the example above, the library defines
 'Market', 'Selection' and 'Order' objects, which are designed to be
 useful abstractions for trading applications.  The library functions
-typically return lists of these objects.  For example,
+typically return lists of these objects.  For example:
 ```python
 betdaq.GetEventSubTreeNoSelections([100004])
 ```
 will return a list of Market objects for the top level event with id
-100004 (which happens to be Horse Racing).  And
+100004 (which happens to be Horse Racing).  And:
 ```python
 betdaq.GetPrices([111, 112])
 ```
@@ -57,9 +57,8 @@ list item is a list of selection objects (the first item is a list of
 selection objects for the market with id 111, the second item the same
 for market id 112).
 
-Further examples of how to use the library functions together to
-produce a simple trading application are given in the examples/
-directory.
+Further examples of how to use the library functions are given in the
+examples/ directory.
 
 API FUNCTIONS IMPLEMENTED
 -------------------------
