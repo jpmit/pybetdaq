@@ -27,6 +27,7 @@ class ApiClient(object):
     _SECURE   = 'secure'
     _sdict    = {_READONLY: ['ReadOnlyService', 0],
                  _SECURE:   ['SecureService', 1]}
+    
     def __init__(self, service):
         """
         Create the SUDS client with the correct options and headers
