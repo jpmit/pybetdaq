@@ -194,7 +194,7 @@ class ApiGetPrices(ApiMethod):
                 
             apilog.info('calling BDAQ Api GetPrices')        
             result = self.client.service.GetPrices(self.req)
-            selections =  apiparse.ParsePrices(ids, result)
+            selections =  apiparse.ParseGetPrices(ids, result)
             allselections = allselections + selections
 
         return allselections
@@ -226,7 +226,7 @@ class ApiGetAccountBalances(ApiMethod):
         result = self.client.service.GetAccountBalances()
         # accountinfo returns a tuple (_AvailableFunds, _Balance,
         #                              _Credit, _Exposure)
-        accinfo = bdaqapiparse.ParseGetAccountBalances(result)
+        accinfo = apiparse.ParseGetAccountBalances(result)
         return accinfo
 
 # not fully implemented (do not use). This lists extra details about
@@ -288,7 +288,7 @@ class ApiListOrdersChangedSince(ApiMethod):
         
         resp = self.client.service.ListOrdersChangedSince(self.req)
 
-        data = bdaqapiparse.ParseListOrdersChangedSince(resp)
+        data = apiparse.ParseListOrdersChangedSince(resp)
 
         if not data:
             # should be returning an empty dict here, i.e. no orders
@@ -331,7 +331,7 @@ class ApiListBootstrapOrders(ApiMethod):
         result = self.client.service.ListBootstrapOrders(self.req)
         # assign sequence number we get back to ORDER_SEQUENCE_NUMBER
         ORDER_SEQUENCE_NUMBER = result._MaximumSequenceNumber
-        allorders = bdaqapiparse.ParseListBootstrapOrders(result)
+        allorders = apiparse.ParseListBootstrapOrders(result)
         if const.WRITEDB:
             self.dbman.WriteOrders(allorders.values(),
                                    result.Timestamp)
@@ -391,7 +391,7 @@ class ApiPlaceOrdersNoReceipt(ApiMethod):
             self.req.Orders.Order = self.makeorderlist(ol)
             betlog.betlog.info('calling BDAQ Api PlaceOrdersNoReceipt')
             result = self.client.service.PlaceOrdersNoReceipt(self.req)
-            ors = bdaqapiparse.ParsePlaceOrdersNoReceipt(result, orderlist)
+            ors = apiparse.ParsePlaceOrdersNoReceipt(result, orderlist)
             orders.update(ors)
 
         # note: could put result.Timestamp in order object so that we
@@ -441,9 +441,12 @@ class ApiCancelOrders(ApiMethod):
     def create_req(self):
         self.req = self.client.factory.create('CancelOrdersRequest')
 
-    def call(self, orderlist):
-        pass
-        return orders
+    def call(self, olist):
+        self.req.OrderHandle = [o.oref for o in olist]
+        betlog.betlog.info('calling BDAQ Api CancelOrders')
+        result = self.client.service.CancelOrders(self.req)
+        ol = apiparse.ParseCancelOrders(result, olist)
+        return ol
 
 #class ApiCancelAllOrdersOnMarket(ApiMethod):
 

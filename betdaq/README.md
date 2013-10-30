@@ -86,7 +86,6 @@ would be handy.  There are quite a few of these methods (all of which
 are 'secure' rather than 'readonly' in Betdaq API jargon):
 
 * UpdateOrdersNoReceipt
-* CancelOrders
 * CancelAllOrdersOnMarket
 * CancelAllOrders
 * SuspendFromTrading

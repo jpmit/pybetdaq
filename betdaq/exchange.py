@@ -2,7 +2,10 @@
 # James Mithen
 # jamesmithen@gmail.com
 
-"""Event, Market, Selection and Order objects."""
+"""
+Event, Market, Selection and Order objects.  Also contained here are
+constants for order status, such as O_UNMATCHED.
+"""
 
 import const
 import exchangedata
@@ -75,67 +78,6 @@ class Selection(object):
         self.backprices = backprices
         self.layprices = layprices
 
-        # paded back and lay prices to const.NUMPRICES
-        self.padback = self.PadPrices(backprices, const.NUMPRICES)
-        self.padlay = self.PadPrices(layprices, const.NUMPRICES)
-
-    def PadPrices(self, prices, num):
-        """
-        Pad prices so that if have fewer than num back or lay prices.
-        """
-        nprices = len(prices)
-        if nprices == num:
-            return prices
-        # pad prices with None
-        app = [(None, None)] * (num - nprices)
-        return prices + app
-
-    def best_back(self):
-        """Return best back price, or 1.0 if no price"""
-        if self.padback[0][0] is None:
-            return exchangedata.MINODDS
-        return max(exchangedata.MINODDS,
-                   self.padback[0][0])
-
-    def best_lay(self):
-        """Return best lay price, or 1000.0 if no price"""
-        if self.padlay[0][0] is None:
-            return exchangedata.MINODDS
-        return min(exchangedata.MAXODDS,
-                   self.padlay[0][0])
-
-    def make_best_lay(self):
-        """
-        Return price for if we wanted to make a market on selection
-        and be the best price on offer to lay.  E.g. if exchange is BF
-        and best lay price is 21, this will return 20.
-        """
-        
-        blay = self.best_lay()
-
-        # design choice: if the best back price is 1, we could return
-        # None, but instead lets return 1.
-        if blay == exchangedata.MINODDS:
-            return exchangedata.MINODDS
-
-        return exchangedata.next_shorter_odds(self.exid, blay)
-
-    def make_best_back(self):
-        """
-        Return price for if we wanted to make a market on selection
-        and be the best price on offer to back E.g. if exchange is BF
-        and best back price is 21, this will return 22.
-        """
-
-        bback = self.best_back()
-
-        # design choice: if the best lay price is 1000, we could
-        # return None, but instead lets return 1000.
-        if bback == exchangedata.MAXODDS:
-            return exchangedata.MAXODDS
-
-        return exchangedata.next_longer_odds(self.exid, bback)
-
     def __repr__(self):
         return ' '.join([self.name, str(self.id)])
 
@@ -163,7 +105,7 @@ O_BACK = 1
 O_LAY = 2
 
 class Order(object):
-    """Returned after an order is placed"""
+    """Returned after an order is placed."""
     def __init__(self, sid, stake, price, polarity, **kwargs):
         self.sid = sid
         self.stake = stake
@@ -188,21 +130,16 @@ class Order(object):
 
         for kw in kwargs:
             # notable kwargs (and therefore possible instance attributes) are:
-            # oref - reference number from API
-            # status - one of the numbers above e.g. MATCHED
-            # matchedstake - amount of order matched
+            # oref           - reference number from API
+            # status         - one of the numbers above e.g. MATCHED
+            # matchedstake   - amount of order matched
             # unmatchedstake - amount of order unmatched
-            # strategy - integer for strategy number
-            #
-            # NEEDED FOR PLACING BETS WITH BF BUT NOT BDAQ:
-            # mid - market id
-            #
-            # NEEDED FOR PLACING BETS WITH BDAQ BUT NOT BF:
-            # src - selection reset count
-            # wsn - withdrawal sequence number
+            # src            - selection reset count
+            # wsn            - withdrawal sequence number
             setattr(self, kw, kwargs[kw])
 
     def __repr__(self):
+        """Note we use dollar symbol rather than GBP symbol here."""
         return '{0} {1} ${2} {3}'.format('BACK' if self.polarity == 1
                                          else 'LAY', self.sid,
                                          self.stake, self.price)

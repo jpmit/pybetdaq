@@ -10,7 +10,7 @@ extract the data we want.
 
 import const
 import util
-from exchange import Market, Selection, Event, Order
+from exchange import *
 from apiexception import ApiError
 
 def ParseListTopLevelEvents(resp):
@@ -75,84 +75,14 @@ def _ParseEventClassifier(eclass, name='', markets=[]):
                                       mtype._IsCurrentlyInRunning,
                                       **dict(mtype)))
 
-def ParseListBootstrapOrders(resp):
-    """
-    Parse a single order, return order object.  Note there are a few
-    things the Api is returning that we are ignoring here.
-    """
-
-    retcode = resp.ReturnStatus._Code
-    tstamp = resp.Timestamp
-
-    # check the return status here
-    # some possible return codes are (see BDAQ docs for complete list):
-    # 136 - WithdrawalSequenceNumberIsInvalid
-    if retcode != 0:
-        # will have to diagnose this in more detail if/when it happens.
-        raise ApiError, ('Error with ListBootstrapOrders '
-                         'return code {0}'.format(retcode))
-
-    # no orders returned; end of bootstrapping process.
-    if not hasattr(resp, 'Orders'):
-        return {}
-
-    # create and return list of order objects.    
-    allorders = {}
-    for o in resp.Orders.Order:
-        sid = o._SelectionId
-        ustake = o._UnmatchedStake
-        mstake = o._MatchedStake
-        stake = ustake + mstake
-        # note we also get back '_MatchedPrice' if matched; this could
-        # be better than '_RequestedPrice'.
-        price = o._RequestedPrice
-        pol = o._Polarity
-        oref = o._Id
-        status = o._Status
-        
-        allorders[oref] = order.Order(const.BDAQID, sid, stake, price,
-                                      pol, **{'oref': oref,
-                                              'status': status,
-                                              'matchedstake': mstake,
-                                              'unmatchedstake': ustake})
-
-    return allorders
-
-def ParsePlaceOrdersNoReceipt(resp, olist):
-    """Return list of order objects"""
-    
-    retcode = resp.ReturnStatus._Code
-    tstamp = resp.Timestamp
-
-    # check the return status here
-    if retcode != 0:
-        # will have to diagnose this in more detail if/when it happens.
-        raise ApiError, ('Did not place order(s) succesfully, '
-                         'return code {0}'.format(retcode))
-
-    # list of order refs - I am presuming BDAQ returns them in the order
-    # the orders were given!
-    orefs = resp.OrderHandles.OrderHandle
-
-    # create and return order object.  Note we set status to UNMATCHED,
-    # and unmatched stake and matched stake accordingly.
-    allorders = {}
-    for (o, ref) in zip(olist, orefs):
-        allorders[ref] = order.Order(const.BDAQID, o.sid, o.stake, o.price,
-                                     o.polarity, **{'oref': ref, 'mid': o.mid,
-                                                    'status': order.UNMATCHED,
-                                                    'matchedstake': 0.0,
-                                                    'unmatchedstake': o.stake})
-    return allorders
-
-def ParsePrices(marketids, resp):
+def ParseGetPrices(marketids, resp):
     retcode = resp.ReturnStatus._Code
     tstamp = resp.Timestamp
 
     # check the Return Status is zero (success)
     # and not:
-    # 8 - market does not exist
-    # 16 - market neither suspended nor active
+    # 8   - market does not exist
+    # 16  - market neither suspended nor active
     # 137 - maximuminputrecordsexceeded (should never get this)
     # 406 - punter blacklisted
     if retcode == 406:
@@ -177,7 +107,7 @@ def ParsePrices(marketids, resp):
         if not hasattr(mprice,'Selections'):
             # can reach here if market suspended
             break
-        
+
         nsel = len(mprice.Selections)
 
         # we store the market withdrawal sequence number in every
@@ -219,7 +149,6 @@ def ParsePrices(marketids, resp):
             # create selection object using given data
             # we need to handle the case of no matches yet, since in
             # this case the response is missing certain fields.
-            print sel
             if not (sel._MatchedSelectionForStake or
                     sel._MatchedSelectionAgainstStake):
                 lastmatchoccur = None
@@ -239,27 +168,105 @@ def ParsePrices(marketids, resp):
                                                lastmatchprice,
                                                lastmatchamount,
                                                bprices, lprices,
-                                               sel._ResetCount, wsn, **dict(sel)))
+                                               sel._ResetCount, wsn,
+                                               **dict(sel)))
     return allselections
 
+def ParseListBootstrapOrders(resp):
+    """
+    Parse a single order, return order object.  Note there are a few
+    things the Api is returning that we are ignoring here.
+    """
+
+    retcode = resp.ReturnStatus._Code
+    tstamp = resp.Timestamp
+
+    # check the return status here
+    # some possible return codes are (see BDAQ docs for complete list):
+    # 136 - WithdrawalSequenceNumberIsInvalid
+    if retcode != 0:
+        # will have to diagnose this in more detail if/when it happens.
+        raise ApiError, ('Error with ListBootstrapOrders '
+                         'return code {0}'.format(retcode))
+
+    # no orders returned; end of bootstrapping process.
+    if not hasattr(resp, 'Orders'):
+        return {}
+
+    # create and return list of order objects.    
+    allorders = {}
+    for o in resp.Orders.Order:
+        sid = o._SelectionId
+        ustake = o._UnmatchedStake
+        mstake = o._MatchedStake
+        stake = ustake + mstake
+        # note we also get back '_MatchedPrice' if matched; this could
+        # be better than '_RequestedPrice'.
+        price = o._RequestedPrice
+        pol = o._Polarity
+        oref = o._Id
+        status = o._Status
+        
+        allorders[oref] = Order(const.BDAQID, sid, stake, price,
+                                pol, **{'oref': oref,
+                                        'status': status,
+                                        'matchedstake': mstake,
+                                        'unmatchedstake': ustake})
+
+    return allorders
+
+def ParsePlaceOrdersNoReceipt(resp, olist):
+    """Return list of order objects."""
+    
+    retcode = resp.ReturnStatus._Code
+    tstamp = resp.Timestamp
+
+    # check the return status here
+    if retcode != 0:
+        # will have to diagnose this in more detail if/when it happens.
+        raise ApiError, ('Did not place order(s) succesfully, '
+                         'return code {0}'.format(retcode))
+
+    # list of order refs - I am presuming BDAQ returns them in the order
+    # the orders were given!
+    orefs = resp.OrderHandles.OrderHandle
+
+    # create and return order object.  Note we set status to UNMATCHED,
+    # and unmatched stake and matched stake accordingly.
+    allorders = {}
+    for (o, ref) in zip(olist, orefs):
+        allorders[ref] = Order(o.sid, o.stake, o.price, o.polarity,
+                               **{'oref': ref,
+                                  'status': O_UNMATCHED,
+                                  'matchedstake': 0.0,
+                                  'unmatchedstake': o.stake})
+    return allorders
+
+def ParseCancelOrders(resp, olist):
+    """Return list of order objects."""
+    
+    retcode = resp.ReturnStatus._Code
+    tstamp = resp.Timestamp
+
+    # check the return status here
+    if retcode != 0:
+        raise ApiError, ('Did not cancel order(s) succesfully, '
+                         'return code {0}'.format(retcode))
+
+    for o in resp.Orders.Order:
+        oref = o._OrderHandle
+        # find the order ref in the list of orders
+        for myo in olist:
+            if myo.oref == oref:
+                myo.status = O_CANCELLED
+                break
+    return olist
+
 def ParseGetAccountBalances(resp):
-    """Returns account balance information by parsing output from BDAQ
-    Api function GetAccountBalances."""
-    # sample resp object we need to parse here:
-    # (GetAccountBalancesResponse){
-    #   _Currency = "GBP"
-    #   _AvailableFunds = 173.38
-    #   _Balance = 211.88
-    #   _Credit = 0.0
-    #   _Exposure = 38.5
-    #   ReturnStatus = 
-    #      (ReturnStatus){
-    #         _CallId = "5b40549c-1ec0-4cd4-ae16-14ff3fc9fe59"
-    #         _Code = 0
-    #         _Description = "Success"
-    #       }
-    #    Timestamp = 2013-08-26 12:21:31.955115
-    # }
+    """
+    Returns account balance information by parsing output from BDAQ
+    Api function GetAccountBalances.
+    """
     retcode = resp.ReturnStatus._Code
     tstamp = resp.Timestamp
 
@@ -315,10 +322,10 @@ def ParseListOrdersChangedSince(resp):
                  'matchedstake' : o._MatchedStake,
                  'unmatchedstake': o._UnmatchedStake}
 
-        allorders[o._Id] = order.Order(const.BDAQID, o._SelectionId,
-                                       o._MatchedStake + o._UnmatchedStake,
-                                       o._RequestedPrice, o._Polarity,
-                                       **odict)
+        allorders[o._Id] = Order(const.BDAQID, o._SelectionId,
+                                 o._MatchedStake + o._UnmatchedStake,
+                                 o._RequestedPrice, o._Polarity,
+                                 **odict)
         # store sequence number
         seqnums.append(o._SequenceNumber)
 
