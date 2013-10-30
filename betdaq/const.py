@@ -31,6 +31,6 @@ WSDLLOCAL = 'file://{0}/wsdl/API.wsdl'.format(os.getcwd())
 # BDAQ API version sent in SOAP headers
 BDAQAPIVERSION = '2'
 
-# BDAQ username and password
+# BDAQ username and password go here
 BDAQUSER = 'jimmybob'
 BDAQPASS = '0am14th0uARTIST'

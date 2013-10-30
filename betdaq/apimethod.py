@@ -10,7 +10,7 @@ in betdaq.py by calling e.g. betdaq.ListTopLevelEvents().
 
 import datetime
 import time
-from betman import const, util, Event, betlog
+import const
 import apiparse
 from apilog import apilog
 
@@ -224,14 +224,13 @@ class ApiGetAccountBalances(ApiMethod):
     def call(self):
         apilog.info('calling BDAQ Api GetAccountBalances')        
         result = self.client.service.GetAccountBalances()
-        # accountinfo returns a tuple (_AvailableFunds, _Balance,
-        #                              _Credit, _Exposure)
+        # accinfo is a tuple (_AvailableFunds, _Balance,
+        #                     _Credit, _Exposure)
         accinfo = apiparse.ParseGetAccountBalances(result)
         return accinfo
 
 # not fully implemented (do not use). This lists extra details about
 # account, mainly orders settled between two dates.
-
 class ApiListAccountPostings(ApiMethod):
     def __init__(self, apiclient):
         super(ApiListAccountPostings, self).__init__(apiclient)         

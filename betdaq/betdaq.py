@@ -14,8 +14,8 @@ PRICETHROTTLE = 10
 # create suds clients.  There is only 1 WSDL file, but this has two
 # 'services'.  The services are for 'readonly' methods and 'secure'
 # methods. Secure methods use an https:// url and require the user's
-# Betdaq username and password in the SOAP headers, read-only methods use http://
-# and only require username.
+# Betdaq username and password in the SOAP headers, read-only methods
+# use http:// and only require username.
 _rcl = apiclient.ApiClient('readonly')
 _scl = apiclient.ApiClient('secure')
 
@@ -26,23 +26,23 @@ ListTopLevelEvents = apimethod.ApiListTopLevelEvents(_rcl).call
 GetEventSubTreeNoSelections = apimethod.\
                               ApiGetEventSubTreeNoSelections(_rcl).call
 
-# get prices for some market ids
-GetPrices = apimethod.ApiGetPrices(_rcl, PRICETHROTTLE).call
-
 # get information for some market ids, e.g. starttime etc.
 GetMarketInformation = apimethod.ApiGetMarketInformation(_rcl).call
 
-# make order(s)
-PlaceOrdersNoReceipt = apimethod.ApiPlaceOrdersNoReceipt(_scl).call
+# get prices for some market ids
+GetPrices = apimethod.ApiGetPrices(_rcl, PRICETHROTTLE).call
 
 # get account information
 GetAccountBalances = apimethod.ApiGetAccountBalances(_scl).call
 
+# update order status
+ListOrdersChangedSince = apimethod.ApiListOrdersChangedSince(_scl).call
+
 # call ListBootstrapOrders repeatedly at startup
 ListBootstrapOrders = apimethod.ApiListBootstrapOrders(_scl).call
 
-# update order status
-ListOrdersChangedSince = apimethod.ApiListOrdersChangedSince(_scl).call
+# make order(s)
+PlaceOrdersNoReceipt = apimethod.ApiPlaceOrdersNoReceipt(_scl).call
 
 # cancel orders
 CancelOrders = apimethod.ApiCancelOrders(_scl).call
