@@ -93,3 +93,10 @@ are 'secure' rather than 'readonly' in Betdaq API jargon):
 * SuspendAllOrdersOnMarket
 * SuspendAllOrders
 * UnsuspendOrders
+
+LICENSE
+-------
+
+pybetdaq is provided under the terms of the GNU GPL license, version
+3.  A copy of this license is included here, see 'gpl.txt'.
+ 
