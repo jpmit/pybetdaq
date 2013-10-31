@@ -6,6 +6,10 @@ PyBetdaq is an interface to the Betdaq sports exchange
 applications that place orders on the Betdaq exchange to be built in
 Python.
 
+This software is copyright (c) James Mithen.  It is supplied here
+under the terms of the GNU GPL license, version 3.  A copy of this
+license is included along with the source code, see 'gpl.txt'.
+ 
 In order to use PyBetdaq, you will need (i) a Betdaq account and (ii)
 to be subscribed to the Betdaq API.  For more information about this,
 see [api.betdaq.com](http://api.betdaq.com).  For more information
@@ -21,18 +25,19 @@ USING THE LIBRARY
 -----------------
 
 The library code, which is all written in Python, is contained in the
-betdaq/ directory.  Add the path to this directory to your PYTHONPATH
-environment variable.
+betdaq/ directory.  To follow along with these examples, add the path
+to the parent directory of betdaq/ (e.g. the path to the pybetdaq
+directory) to your PYTHONPATH environment variable.
 
 To library can be used in a Python program as follows:
 ```python
-import betdaq
+from betdaq import api
 ```
 
 The Betdaq API functions are then available in the betdaq namespace.
 For example:
 ```python
-betdaq.ListTopLevelEvents()
+api.ListTopLevelEvents()
 ```
 will return a list of Event objects, each representing a top level
 event e.g. 'Horse Racing' or 'Soccer'.
@@ -42,12 +47,12 @@ As well as 'Event' objects in the example above, the library defines
 useful abstractions for trading applications.  The library functions
 typically return lists of these objects.  For example:
 ```python
-betdaq.GetEventSubTreeNoSelections([100004])
+api.GetEventSubTreeNoSelections([100004])
 ```
 will return a list of Market objects for the top level event with id
 100004 (which happens to be Horse Racing).  And:
 ```python
-betdaq.GetPrices([111, 112])
+api.GetPrices([111, 112])
 ```
 
 where 111 and 112 are market ids (which do not correspond to real
@@ -94,9 +99,5 @@ are 'secure' rather than 'readonly' in Betdaq API jargon):
 * SuspendAllOrders
 * UnsuspendOrders
 
-LICENSE
--------
-
-pybetdaq is provided under the terms of the GNU GPL license, version
-3.  A copy of this license is included here, see 'gpl.txt'.
- 
+Other things to do
+* Unit tests
