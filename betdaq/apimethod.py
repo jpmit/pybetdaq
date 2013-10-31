@@ -5,13 +5,14 @@
 """
 Classes for calling the Betdaq Api Methods.  These are not designed to
 be called from user applications directly; rather, use the interface
-in betdaq.py by calling e.g. betdaq.ListTopLevelEvents().
+in api.py by calling e.g. api.ListTopLevelEvents().
 """
 
 import datetime
 import time
 import const
 import apiparse
+import util
 from apilog import apilog
 
 class ApiMethod(object):
@@ -281,9 +282,9 @@ class ApiListOrdersChangedSince(ApiMethod):
         else:
             self.req.SequenceNumber = ORDER_SEQUENCE_NUMBER
 
-        apilog.debug(('Calling ListOrdersChangedSince with '
-                      'sequence number: {0}'\
-                      .format(self.req.SequenceNumber)))
+        apilog.info(('Calling ListOrdersChangedSince with '
+                     'sequence number: {0}'\
+                     .format(self.req.SequenceNumber)))
         
         resp = self.client.service.ListOrdersChangedSince(self.req)
 
@@ -300,8 +301,8 @@ class ApiListOrdersChangedSince(ApiMethod):
         # set order sequence number to the maximum one returned by Api
         ORDER_SEQUENCE_NUMBER = snum        
 
-        betlog.betlog.debug('Setting sequence number to: {0}'\
-                            .format(snum))
+        apilog.debug('Setting sequence number to: {0}'\
+                     .format(snum))
 
         return orders
 
@@ -326,7 +327,7 @@ class ApiListBootstrapOrders(ApiMethod):
         # the bootstrap which is next class
         global ORDER_SEQUENCE_NUMBER
         self.req.SequenceNumber = ORDER_SEQUENCE_NUMBER
-        betlog.betlog.info('calling BDAQ Api ListBootstrapOrders')        
+        apilog.info('calling BDAQ Api ListBootstrapOrders')        
         result = self.client.service.ListBootstrapOrders(self.req)
         # assign sequence number we get back to ORDER_SEQUENCE_NUMBER
         ORDER_SEQUENCE_NUMBER = result._MaximumSequenceNumber
@@ -388,7 +389,7 @@ class ApiPlaceOrdersNoReceipt(ApiMethod):
         for ol in util.chunks(orderlist, MAXORDERS):        
             # make BDAQ representation of orders from orderlist past
             self.req.Orders.Order = self.makeorderlist(ol)
-            betlog.betlog.info('calling BDAQ Api PlaceOrdersNoReceipt')
+            apilog.info('calling BDAQ Api PlaceOrdersNoReceipt')
             result = self.client.service.PlaceOrdersNoReceipt(self.req)
             ors = apiparse.ParsePlaceOrdersNoReceipt(result, orderlist)
             orders.update(ors)
@@ -426,7 +427,7 @@ class ApiPlaceOrdersWithReceipt(ApiMethod):
         # see 'ordertest.py' for what the dict should contain
         self.makeorder(order)
         self.req.Orders.Order = [self.order]
-        betlog.betlog.info('calling BDAQ Api PlaceOrdersWithReceipt')        
+        apilog.info('calling BDAQ Api PlaceOrdersWithReceipt')        
         result = self.client.service.PlaceOrdersWithReceipt(self.req)
         return result
 
@@ -442,7 +443,7 @@ class ApiCancelOrders(ApiMethod):
 
     def call(self, olist):
         self.req.OrderHandle = [o.oref for o in olist]
-        betlog.betlog.info('calling BDAQ Api CancelOrders')
+        apilog.info('calling BDAQ Api CancelOrders')
         result = self.client.service.CancelOrders(self.req)
         ol = apiparse.ParseCancelOrders(result, olist)
         return ol
@@ -456,7 +457,7 @@ class ApiListBlacklistInformation(ApiMethod):
         self.client = apiclient.client
 
     def call(self):
-        betlog.betlog.info('calling BDAQ Api ListBlacklistInformation')
+        api.info('calling BDAQ Api ListBlacklistInformation')
         result = self.client.service.ListBlacklistInformation()
         return result
 

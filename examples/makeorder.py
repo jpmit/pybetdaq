@@ -3,7 +3,7 @@
 # jamesmithen@gmail.com
 
 """
-Example of making an order on Betdaq.
+Example of making an order and cancelling an order.
 """
 
 from betdaq import api, exchange
