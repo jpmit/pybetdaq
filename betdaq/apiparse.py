@@ -14,23 +14,29 @@ from exchange import *
 from apiexception import ApiError
 
 def ParseListTopLevelEvents(resp):
+    retcode = resp.ReturnStatus._Code
+
+    if retcode != 0:
+        raise ApiError, '{0} {1}'.format(retcode,
+                                         resp.ReturnStatus._Description)
+
     events = []
     for ec in resp.EventClassifiers:
         events.append(Event(ec._Name, ec._Id, **dict(ec)))
     return events
 
 def ParseGetEventSubTreeNoSelections(resp):
-    # first thing is return status
-    # return code below should be zero if successful
     retcode = resp.ReturnStatus._Code
-    tstamp = resp.Timestamp    
+
     # check the Return Status is zero (success)
     # and not:
     # 5   - event classifier does not exist
     # 137 - maximuminputrecordsexceeded
     # 406 - punter blacklisted
-    if retcode == 406:
-        raise ApiError, 'punter is blacklisted'
+
+    if retcode != 0:
+        raise ApiError, '{0} {1}'.format(retcode,
+                                         resp.ReturnStatus._Description)
     
     allmarkets = []
     markets = []
@@ -77,7 +83,6 @@ def _ParseEventClassifier(eclass, name='', markets=[]):
 
 def ParseGetPrices(marketids, resp):
     retcode = resp.ReturnStatus._Code
-    tstamp = resp.Timestamp
 
     # check the Return Status is zero (success)
     # and not:
@@ -85,8 +90,10 @@ def ParseGetPrices(marketids, resp):
     # 16  - market neither suspended nor active
     # 137 - maximuminputrecordsexceeded (should never get this)
     # 406 - punter blacklisted
-    if retcode == 406:
-        raise ApiError, 'punter is blacklisted'
+
+    if retcode != 0:
+        raise ApiError, '{0} {1}'.format(retcode,
+                                         resp.ReturnStatus._Description)
 
     # if we only called with a single market id, we won't have a list
     if len(marketids) == 1:
@@ -179,15 +186,14 @@ def ParseListBootstrapOrders(resp):
     """
 
     retcode = resp.ReturnStatus._Code
-    tstamp = resp.Timestamp
 
     # check the return status here
     # some possible return codes are (see BDAQ docs for complete list):
     # 136 - WithdrawalSequenceNumberIsInvalid
+
     if retcode != 0:
-        # will have to diagnose this in more detail if/when it happens.
-        raise ApiError, ('Error with ListBootstrapOrders '
-                         'return code {0}'.format(retcode))
+        raise ApiError, '{0} {1}'.format(retcode,
+                                         resp.ReturnStatus._Description)
 
     # no orders returned; end of bootstrapping process.
     if not hasattr(resp, 'Orders'):
@@ -219,7 +225,10 @@ def ParsePlaceOrdersNoReceipt(resp, olist):
     """Return list of order objects."""
     
     retcode = resp.ReturnStatus._Code
-    tstamp = resp.Timestamp
+
+    if retcode != 0:
+        raise ApiError, '{0} {1}'.format(retcode,
+                                         resp.ReturnStatus._Description)
 
     # check the return status here
     if retcode != 0:
@@ -246,12 +255,10 @@ def ParseCancelOrders(resp, olist):
     """Return list of order objects."""
     
     retcode = resp.ReturnStatus._Code
-    tstamp = resp.Timestamp
 
-    # check the return status here
     if retcode != 0:
-        raise ApiError, ('Did not cancel order(s) succesfully, '
-                         'return code {0}'.format(retcode))
+        raise ApiError, '{0} {1}'.format(retcode,
+                                         resp.ReturnStatus._Description)
 
     for o in resp.Orders.Order:
         oref = o._OrderHandle
@@ -267,8 +274,8 @@ def ParseGetAccountBalances(resp):
     Returns account balance information by parsing output from BDAQ
     Api function GetAccountBalances.
     """
+
     retcode = resp.ReturnStatus._Code
-    tstamp = resp.Timestamp
 
     # check the Return Status is zero (success)
     # and not:
@@ -282,17 +289,16 @@ def ParseGetAccountBalances(resp):
 
 def ParseListOrdersChangedSince(resp):
     """Returns list of orders that have changed"""
+
     retcode = resp.ReturnStatus._Code
-    tstamp = resp.Timestamp
 
     # check the Return Status is zero (success)
     # and not:
     # 406 - punter blacklisted
     # 310 - sequence number less than zero
-    if retcode == 406:
-        raise ApiError, 'punter is blacklisted'
-    elif retcode == 310:
-        raise ApiError, 'sequence number cannot be less than zero'
+    if retcode != 0:
+        raise ApiError, '{0} {1}'.format(retcode,
+                                         resp.ReturnStatus._Description)
 
     if not hasattr(resp, 'Orders'):
         # no orders have changed
