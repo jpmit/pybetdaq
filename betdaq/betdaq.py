@@ -19,6 +19,22 @@ PRICETHROTTLE = 10
 _rcl = apiclient.ApiClient('readonly')
 _scl = apiclient.ApiClient('secure')
 
+def set_user(name, password):
+    """
+    Set username and password for SOAP headers.  Note that these are
+    automatically set to be const.BDAQUSER and const.BDAQPASS,
+    respectively, so we only need to call this method if we don't have
+    these values set.
+    """
+    
+    _rcl.set_headers(name, password)
+    _scl.set_headers(name, password)
+
+# the Api functions appear below, first 'readonly' methods, then
+# 'secure' methods, in the order that these appear in the Betdaq Api
+# docs (but note that not all of the Api methods are implemented
+# here).
+
 # get all the root events e.g. 'Horse Racing', 'Soccer' etc.
 ListTopLevelEvents = apimethod.ApiListTopLevelEvents(_rcl).call
 

@@ -42,15 +42,30 @@ class ApiClient(object):
                           format(' '.join(aservices)))
         self.service = service
         self.snum = ApiClient._sdict[self.service][1]
-        self.client = self._create_suds_client()
+        # after this call, self.client will be a SUDS client object
+        self._create_suds_client()
 
     def _create_suds_client(self):
         """Return SUDS client for BDAQ API."""
         
-        client = Client(const.WSDLLOCAL)
-        client.set_options(service = ApiClient._sdict[self.service][0],
-                           headers = {'user-agent': const.USERAGENT})
+        self.client = Client(const.WSDLLOCAL)
+        self.client.set_options(service = ApiClient._sdict[self.service][0],
+                                headers = {'user-agent': const.USERAGENT})
+
+        # put username (and password if necessary) into the headers.
+        # note that another way to do this is to call betdaq.set_user,
+        # so the username and password in const.py do not need to be
+        # specified.
+        self.set_headers(const.BDAQUSER, const.BDAQPASS)
+
+    def method_names(self):
+        """Return list of methods (API functions)"""
         
+        return self.client.wsdl.services[self.snum].ports[0].methods.keys()
+
+    def set_headers(self, name, password):
+        """Set the username and password that needs to go in the SOAP header."""
+           
         # this SOAP header is required by the API in this form
         header = Element('ExternalApiHeader')
         
@@ -60,21 +75,15 @@ class ApiClient(object):
                        'username="{1}" '
                        'xmlns="http://www.GlobalBettingExchange'
                        '.com/ExternalAPI/"'.format(const.BDAQAPIVERSION,
-                                                   const.BDAQUSER))
+                                                   name))
         if self.service == ApiClient._SECURE:
             # we send the username and password in the SOAP header
             astring = ('version="{0}" currency="GBP" languageCode="en" '
                        'username="{1}" password="{2}" '
                        'xmlns="http://www.GlobalBettingExchange'
                        '.com/ExternalAPI/"'.format(const.BDAQAPIVERSION,
-                                                   const.BDAQUSER,
-                                                   const.BDAQPASS))
+                                                   name,
+                                                   password))
         # set header
         header.attributes = [astring]
-        client.set_options(soapheaders=header)    
-        return client
-
-    def method_names(self):
-        """Return list of methods (API functions)"""
-        
-        return self.client.wsdl.services[self.snum].ports[0].methods.keys()
+        self.client.set_options(soapheaders = header)

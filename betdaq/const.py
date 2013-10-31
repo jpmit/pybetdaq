@@ -22,7 +22,7 @@ LOGGING = True
 NUMPRICES = 5
 
 # send as 'user-agent' header for all SOAP requests
-USERAGENT = 'pybetman/{0} Python/{1} Suds/{2}'.\
+USERAGENT = 'pybetman/{0} python/{1} suds/{2}'.\
             format(VERSION, sys.version.split()[0], suds.__version__)
 
 # path to local copy of WSDL file
@@ -31,6 +31,7 @@ WSDLLOCAL = 'file://{0}/wsdl/API.wsdl'.format(os.getcwd())
 # BDAQ API version sent in SOAP headers
 BDAQAPIVERSION = '2'
 
-# BDAQ username and password go here
-BDAQUSER = 'jimmybob'
-BDAQPASS = '0am14th0uARTIST'
+# BDAQ username and password go here; alternatively, we can call
+# betdaq.set_user.
+BDAQUSER = 'jim'
+BDAQPASS = 'password'
