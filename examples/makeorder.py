@@ -6,8 +6,7 @@
 Example of making an order on Betdaq.
 """
 
-import betdaq
-import exchange
+from betdaq import api, exchange
 
 order = exchange.Order(17676142,        # selection id
                        0.5,             # stake
@@ -16,11 +15,11 @@ order = exchange.Order(17676142,        # selection id
                        
 # odict is a dictionary with keys that correspond to the order ids,
 # and corresponding items that are the order objects.
-odict = betdaq.PlaceOrdersNoReceipt([order])
+odict = api.PlaceOrdersNoReceipt([order])
 
 # here we have only one order in the dictionary
 myorder = odict.values()[0]
 
 # to cancel an order, pass the list of order object to the API
 # function.
-odict = betdaq.CancelOrders([myorder])
+odict = api.CancelOrders([myorder])

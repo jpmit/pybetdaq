@@ -1,4 +1,4 @@
-# bdaqapi.py
+# api.py
 # James Mithen
 # jamesmithen@gmail.com
 
@@ -9,7 +9,7 @@ import apiclient
 
 # time in seconds to sleep between calling APIGetPrices (when called
 # with > 50 market ids).
-PRICETHROTTLE = 10
+_PRICETHROTTLE = 10
 
 # create suds clients.  There is only 1 WSDL file, but this has two
 # 'services'.  The services are for 'readonly' methods and 'secure'
@@ -46,7 +46,7 @@ GetEventSubTreeNoSelections = apimethod.\
 GetMarketInformation = apimethod.ApiGetMarketInformation(_rcl).call
 
 # get prices for some market ids
-GetPrices = apimethod.ApiGetPrices(_rcl, PRICETHROTTLE).call
+GetPrices = apimethod.ApiGetPrices(_rcl, _PRICETHROTTLE).call
 
 # get account information
 GetAccountBalances = apimethod.ApiGetAccountBalances(_scl).call
@@ -66,4 +66,3 @@ CancelOrders = apimethod.ApiCancelOrders(_scl).call
 # which Api services (hopefully none) am I currently blacklisted from?
 ListBlacklistInformation = apimethod.\
                            ApiListBlacklistInformation(_scl).call
-
