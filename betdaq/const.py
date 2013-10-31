@@ -26,7 +26,9 @@ USERAGENT = 'pybetman/{0} python/{1} suds/{2}'.\
             format(VERSION, sys.version.split()[0], suds.__version__)
 
 # path to local copy of WSDL file
-WSDLLOCAL = 'file://{0}/wsdl/API.wsdl'.format(os.getcwd())
+_mypath = os.path.dirname(os.path.join(os.getcwd(), __file__))
+_wsdlpath = os.path.join(_mypath, 'wsdl', 'API.wsdl')
+WSDLLOCAL = 'file://{0}'.format(_wsdlpath)
 
 # BDAQ API version sent in SOAP headers
 BDAQAPIVERSION = '2'

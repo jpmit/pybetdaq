@@ -277,11 +277,9 @@ def ParseGetAccountBalances(resp):
 
     retcode = resp.ReturnStatus._Code
 
-    # check the Return Status is zero (success)
-    # and not:
-    # 406 - punter blacklisted
-    if retcode == 406:
-        raise ApiError, 'punter is blacklisted'
+    if retcode != 0:
+        raise ApiError, '{0} {1}'.format(retcode,
+                                         resp.ReturnStatus._Description)
 
     # Return tuple of _AvailableFunds, _Balance, _Credit, _Exposure
     return (resp._AvailableFunds, resp._Balance,
