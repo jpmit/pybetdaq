@@ -22,7 +22,7 @@ about the PyBetdaq library, read on.
 REQUIREMENTS
 -------------
 
-* Python 2.x (tested with Python 2.7)
+* Python 2.x (tested with Python 2.7).  Python 3 may work, but has not been tested.
 * SUDS library (see https://fedorahosted.org/suds/)
 
 USING THE LIBRARY
