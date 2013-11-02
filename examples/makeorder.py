@@ -8,11 +8,20 @@ Example of making an order and cancelling an order.
 
 from betdaq import api, exchange
 
-order = exchange.Order(17676142,        # selection id
+api.set_user('username', 'password')
+    
+# create an order object.  Note the selection id here is a dummy one.
+# We may also want to pass kwargs 'src', 'wsn', 'cancelrunning', and
+# 'cancelreset'.  These default to 0, 0, True and True respectively.
+# Note 'src' (selection reset count) and 'wsn' withdrawal sequence
+# number need to be set correctly.  These are stored in the selection
+# objects (see the example getmarkets.py); here we are assuming that
+# they are both 0, which may not be correct.
+order = exchange.Order(-1,              # selection id
                        0.5,             # stake
-                       100.0,           # price (odds)
-                       exchange.O_BACK) # polarity
-                       
+                       990.0,           # price (odds)
+                       exchange.O_BACK) # polarity (evaluates to 1)
+
 # odict is a dictionary with keys that correspond to the order ids,
 # and corresponding items that are the order objects.
 odict = api.PlaceOrdersNoReceipt([order])

@@ -8,7 +8,9 @@ those markets.
 """
 
 from betdaq import api
-from random import randint
+
+# replace 'username' and 'password' with your credentials
+api.set_user('username', 'password')
 
 # this will return a list of 'event' objects representing Horse
 # Racing, Soccer etc.
