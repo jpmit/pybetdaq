@@ -18,7 +18,7 @@ VERSION = '0.1'
 # function is called.
 LOGGING = True
 
-# number of prices to get from API
+# maximum number of prices to get from API
 NUMPRICES = 5
 
 # send as 'user-agent' header for all SOAP requests
@@ -35,5 +35,5 @@ BDAQAPIVERSION = '2'
 
 # BDAQ username and password go here; alternatively, we can call
 # betdaq.set_user.
-BDAQUSER = 'jim'
+BDAQUSER = 'username'
 BDAQPASS = 'password'

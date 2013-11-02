@@ -3,9 +3,9 @@
 # jamesmithen@gmail.com
 
 """
-Functions for parsing the data received from BDAQ Api calls.  The
-SUDS library has done most of the work for us here, we just need to
-extract the data we want.
+Functions for parsing the data received from BDAQ Api calls.  The SUDS
+library has done most of the work for us here, we just need to extract
+the data we want.
 """
 
 import const
@@ -281,9 +281,10 @@ def ParseGetAccountBalances(resp):
         raise ApiError, '{0} {1}'.format(retcode,
                                          resp.ReturnStatus._Description)
 
-    # Return tuple of _AvailableFunds, _Balance, _Credit, _Exposure
-    return (resp._AvailableFunds, resp._Balance,
-            resp._Credit, resp._Exposure)
+    return {'available': resp._AvailableFunds,
+            'balance': resp._Balance,
+            'credit': resp._Credit,
+            'exposure': resp._Exposure}
 
 def ParseListOrdersChangedSince(resp):
     """Returns list of orders that have changed"""
@@ -326,7 +327,7 @@ def ParseListOrdersChangedSince(resp):
                  'matchedstake' : o._MatchedStake,
                  'unmatchedstake': o._UnmatchedStake}
 
-        allorders[o._Id] = Order(const.BDAQID, o._SelectionId,
+        allorders[o._Id] = Order(o._SelectionId,
                                  o._MatchedStake + o._UnmatchedStake,
                                  o._RequestedPrice, o._Polarity,
                                  **odict)

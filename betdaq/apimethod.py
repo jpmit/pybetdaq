@@ -225,8 +225,8 @@ class ApiGetAccountBalances(ApiMethod):
     def call(self):
         apilog.info('calling BDAQ Api GetAccountBalances')        
         result = self.client.service.GetAccountBalances()
-        # accinfo is a tuple (_AvailableFunds, _Balance,
-        #                     _Credit, _Exposure)
+        # accinfo is a dictionary of (_AvailableFunds, _Balance,
+        # _Credit, _Exposure).
         accinfo = apiparse.ParseGetAccountBalances(result)
         return accinfo
 
@@ -301,8 +301,8 @@ class ApiListOrdersChangedSince(ApiMethod):
         # set order sequence number to the maximum one returned by Api
         ORDER_SEQUENCE_NUMBER = snum        
 
-        apilog.debug('Setting sequence number to: {0}'\
-                     .format(snum))
+        #apilog.debug('Setting sequence number to: {0}'\
+        #             .format(snum))
 
         return orders
 
@@ -332,9 +332,6 @@ class ApiListBootstrapOrders(ApiMethod):
         # assign sequence number we get back to ORDER_SEQUENCE_NUMBER
         ORDER_SEQUENCE_NUMBER = result._MaximumSequenceNumber
         allorders = apiparse.ParseListBootstrapOrders(result)
-        if const.WRITEDB:
-            self.dbman.WriteOrders(allorders.values(),
-                                   result.Timestamp)
         return allorders
 
 # not fully implemented (do not use)
@@ -376,8 +373,8 @@ class ApiPlaceOrdersNoReceipt(ApiMethod):
             # this stuff in correctly
             order._ExpectedSelectionResetCount = o.src
             order. _ExpectedWithdrawalSequenceNumber = o.wsn,         
-            order._CancelOnInRunning = False #True
-            order._CancelIfSelectionReset = False #True
+            order._CancelOnInRunning = o.cancelrunning
+            order._CancelIfSelectionReset = o.cancelreset
 
             olist.append(order)
         return olist
@@ -457,7 +454,7 @@ class ApiListBlacklistInformation(ApiMethod):
         self.client = apiclient.client
 
     def call(self):
-        api.info('calling BDAQ Api ListBlacklistInformation')
+        apilog.info('calling BDAQ Api ListBlacklistInformation')
         result = self.client.service.ListBlacklistInformation()
         return result
 

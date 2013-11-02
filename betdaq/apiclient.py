@@ -2,9 +2,7 @@
 # James Mithen
 # jamesmithen@gmail.com
 
-"""
-BdaqApiClient class used in calling API functions for BDAQ.
-"""
+"""BdaqApiClient class used in calling API functions for BDAQ."""
 
 from suds.client import Client
 from suds.sax.element import Element

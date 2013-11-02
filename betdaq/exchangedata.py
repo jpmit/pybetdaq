@@ -11,7 +11,6 @@ Betdaq API (see the API docs).
 import math
 import const
 
-# same for both BDAQ and BF
 MINODDS = 1.0
 MAXODDS = 1000.0
 

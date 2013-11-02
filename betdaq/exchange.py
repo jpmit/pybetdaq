@@ -59,7 +59,7 @@ class Selection(object):
         # convert name to ascii string, i.e. ignore any funky unicode
         # characters.
         self.name = name.encode('ascii', 'ignore')        
-        self.id = sid # selection id
+        self.id = sid       # selection id
         self.mid = marketid # market id I belong to
         self.matchedback = mback        
         self.matchedlay = mlay        
@@ -100,42 +100,47 @@ O_CANCELLED = 3
 O_SETTLED = 4
 O_VOID = 5
 O_SUSPENDED = 6
-# polarity
+# polarity of order
 O_BACK = 1
 O_LAY = 2
 
 class Order(object):
     """Returned after an order is placed."""
     def __init__(self, sid, stake, price, polarity, **kwargs):
+        """
+        Create order from selection id, stake (in GBP), price (odds),
+        polarity (O_BACK or O_LAY).
+        """
+        
         self.sid = sid
         self.stake = stake
         self.price = price
         self.polarity = polarity # 1 for back, 2 for lay
 
-        # the status set here is the default and it will be
-        # overwritten by the dict kwargs.
+        # the following are defaults and can be overridden by **kwargs
         self.status = O_NOTPLACED
-
-        # set default values which may be overridden by **kwargs
-        # selection reset count and withdrawal sequence number (needed
-        # for BDAQ).
+        # cancel when market goes 'in running'?        
+        self.cancelrunning = True
+        # cancel if selection is reset?
+        self.cancelreset = True
+        # selection reset count        
         self.src = 0
-        self.wsn = 0
-
-        # persistence type (used for betfair); default here is 'in
-        # play', which means the order persists (is not cancelled)
-        # when the order goes in play (e.g. when a horse race or
-        # football match starts).
-        self.persistence = 'IP'
+        # withdrawal selection number        
+        self.wsn = 0              
 
         for kw in kwargs:
             # notable kwargs (and therefore possible instance attributes) are:
+            # not set at instantiation:
             # oref           - reference number from API
-            # status         - one of the numbers above e.g. MATCHED
             # matchedstake   - amount of order matched
             # unmatchedstake - amount of order unmatched
+            # set at instantiation:
+            # status         - one of the numbers above e.g. O_MATCHED
+            # cancelrunning  - default is True
+            # cancelreset    - default is True
             # src            - selection reset count
             # wsn            - withdrawal sequence number
+            
             setattr(self, kw, kwargs[kw])
 
     def __repr__(self):
