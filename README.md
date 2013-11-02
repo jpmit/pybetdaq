@@ -12,7 +12,7 @@ The software is supplied here under the terms of the GNU GPL license,
 version 3.  A copy of this license is included along with the source
 code, see 'gpl.txt'.  Note that the copyright holder accepts no
 responsibility for any financial loss resulting from the use of this
-software.  See the GNU General Public License for more details.
+software.
  
 In order to use PyBetdaq, you will need (i) a Betdaq account and (ii)
 to be subscribed to the Betdaq API.  For more information about this,
@@ -30,8 +30,8 @@ USING THE LIBRARY
 
 The library code, which is all written in Python, is contained in the
 betdaq/ directory.  To follow along with these examples, add the path
-to the parent directory of betdaq/ (e.g. the path to the pybetdaq
-directory) to your PYTHONPATH environment variable.
+to the parent directory of betdaq/ to your PYTHONPATH environment
+variable.
 
 The library can be used in a Python program as follows:
 ```python
@@ -40,19 +40,20 @@ api.set_user('username', 'password')
 ```
 
 where 'username' and 'password' are for your Betdaq account.  set_user
-must be called before using the api since the username and password
-are needed in the SOAP headers.  As an alternative, the username and
-password can be hard coded into const.py as BDAQUSER and BDAQPASS (see
-const.py).
+must be called before using the api functions since the username and
+password are needed in the SOAP headers (see the API docs).  As an
+alternative, the username and password can be hard coded into const.py
+as BDAQUSER and BDAQPASS (see const.py).
 
-The Betdaq API functions are then available in the betdaq namespace in
-MixedCase (as in the API docs).
-For example:
+The Betdaq API functions are available in the betdaq.api namespace in
+MixedCase (as in the API docs).  For example, after the above code
+snippet we can write:
+
 ```python
 api.ListTopLevelEvents()
 ```
-will return a list of Event objects, each representing a top level
-event e.g. 'Horse Racing' or 'Soccer'.
+which will return a list of Event objects, each representing a top
+level event e.g. 'Horse Racing' or 'Soccer'.
 
 As well as 'Event' objects in the example above, the library defines
 'Market', 'Selection' and 'Order' objects, which are designed to be
