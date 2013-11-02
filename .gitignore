@@ -4,3 +4,6 @@ backup*
 createzip*
 *.zip
 *.gpg
+header.txt
+test
+writeheader.py
