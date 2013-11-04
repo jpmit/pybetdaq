@@ -225,7 +225,7 @@ def ParseListBootstrapOrders(resp):
         oref = o._Id
         status = o._Status
         
-        allorders[oref] = Order(const.BDAQID, sid, stake, price,
+        allorders[oref] = Order(sid, stake, price,
                                 pol, **{'oref': oref,
                                         'status': status,
                                         'matchedstake': mstake,

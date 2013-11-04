@@ -228,7 +228,7 @@ class ApiGetCurrentSelectionSequenceNumber(ApiMethod):
         return result
 
 # classes that implement the secure methods, in the order that they
-# appear in in the Betdaq documentation 'NewExternalApispec.doc'.
+# appear in the Betdaq documentation 'NewExternalApispec.doc'.
 
 class ApiGetAccountBalances(ApiMethod):
     def __init__(self, apiclient):
@@ -246,7 +246,7 @@ class ApiGetAccountBalances(ApiMethod):
 # account, mainly orders settled between two dates.
 class ApiListAccountPostings(ApiMethod):
     def __init__(self, apiclient):
-        super(ApiListAccountPostings, self).__init__(apiclient)         
+        super(ApiListAccountPostings, self).__init__(apiclient)
         self.create_req()
 
     def create_req(self):
@@ -366,7 +366,8 @@ class ApiPlaceOrdersNoReceipt(ApiMethod):
         self.create_req()
 
     def create_req(self):
-        self.req = self.client.factory.create('PlaceOrdersNoReceiptRequest')
+        self.req = self.client.factory.\
+                   create('PlaceOrdersNoReceiptRequest')
         # if one fails, none will be placed
         self.req.WantAllOrNothingBehaviour = True
 
