@@ -25,12 +25,22 @@ import util
 from exchange import *
 from apiexception import ApiError
 
-def ParseListTopLevelEvents(resp):
+def _check_errors(resp):
+    """
+    Check errors from BDAQ API response.  This function is called in
+    all of the parsing functions below before extracting any data from
+    the response.
+    """
+
     retcode = resp.ReturnStatus._Code
 
     if retcode != 0:
         raise ApiError, '{0} {1}'.format(retcode,
                                          resp.ReturnStatus._Description)
+
+def ParseListTopLevelEvents(resp):
+
+    _check_errors(resp)
 
     events = []
     for ec in resp.EventClassifiers:
@@ -38,17 +48,8 @@ def ParseListTopLevelEvents(resp):
     return events
 
 def ParseGetEventSubTreeNoSelections(resp):
-    retcode = resp.ReturnStatus._Code
 
-    # check the Return Status is zero (success)
-    # and not:
-    # 5   - event classifier does not exist
-    # 137 - maximuminputrecordsexceeded
-    # 406 - punter blacklisted
-
-    if retcode != 0:
-        raise ApiError, '{0} {1}'.format(retcode,
-                                         resp.ReturnStatus._Description)
+    _check_errors(resp)
     
     allmarkets = []
     markets = []
@@ -94,18 +95,8 @@ def _ParseEventClassifier(eclass, name='', markets=[]):
                                       **dict(mtype)))
 
 def ParseGetPrices(marketids, resp):
-    retcode = resp.ReturnStatus._Code
 
-    # check the Return Status is zero (success)
-    # and not:
-    # 8   - market does not exist
-    # 16  - market neither suspended nor active
-    # 137 - maximuminputrecordsexceeded (should never get this)
-    # 406 - punter blacklisted
-
-    if retcode != 0:
-        raise ApiError, '{0} {1}'.format(retcode,
-                                         resp.ReturnStatus._Description)
+    _check_errors(resp)
 
     # if we only called with a single market id, we won't have a list
     if len(marketids) == 1:
@@ -197,15 +188,7 @@ def ParseListBootstrapOrders(resp):
     things the Api is returning that we are ignoring here.
     """
 
-    retcode = resp.ReturnStatus._Code
-
-    # check the return status here
-    # some possible return codes are (see BDAQ docs for complete list):
-    # 136 - WithdrawalSequenceNumberIsInvalid
-
-    if retcode != 0:
-        raise ApiError, '{0} {1}'.format(retcode,
-                                         resp.ReturnStatus._Description)
+    _check_errors(resp)
 
     # no orders returned; end of bootstrapping process.
     if not hasattr(resp, 'Orders'):
@@ -235,18 +218,8 @@ def ParseListBootstrapOrders(resp):
 
 def ParsePlaceOrdersNoReceipt(resp, olist):
     """Return list of order objects."""
-    
-    retcode = resp.ReturnStatus._Code
 
-    if retcode != 0:
-        raise ApiError, '{0} {1}'.format(retcode,
-                                         resp.ReturnStatus._Description)
-
-    # check the return status here
-    if retcode != 0:
-        # will have to diagnose this in more detail if/when it happens.
-        raise ApiError, ('Did not place order(s) succesfully, '
-                         'return code {0}'.format(retcode))
+    _check_errors(resp)
 
     # list of order refs - I am presuming BDAQ returns them in the order
     # the orders were given!
@@ -265,12 +238,8 @@ def ParsePlaceOrdersNoReceipt(resp, olist):
 
 def ParseCancelOrders(resp, olist):
     """Return list of order objects."""
-    
-    retcode = resp.ReturnStatus._Code
 
-    if retcode != 0:
-        raise ApiError, '{0} {1}'.format(retcode,
-                                         resp.ReturnStatus._Description)
+    _check_errors(resp)
 
     for o in resp.Orders.Order:
         oref = o._OrderHandle
@@ -287,11 +256,7 @@ def ParseGetAccountBalances(resp):
     Api function GetAccountBalances.
     """
 
-    retcode = resp.ReturnStatus._Code
-
-    if retcode != 0:
-        raise ApiError, '{0} {1}'.format(retcode,
-                                         resp.ReturnStatus._Description)
+    _check_errors(resp)
 
     return {'available': resp._AvailableFunds,
             'balance': resp._Balance,
@@ -301,15 +266,7 @@ def ParseGetAccountBalances(resp):
 def ParseListOrdersChangedSince(resp):
     """Returns list of orders that have changed"""
 
-    retcode = resp.ReturnStatus._Code
-
-    # check the Return Status is zero (success)
-    # and not:
-    # 406 - punter blacklisted
-    # 310 - sequence number less than zero
-    if retcode != 0:
-        raise ApiError, '{0} {1}'.format(retcode,
-                                         resp.ReturnStatus._Description)
+    _check_errors(resp)
 
     if not hasattr(resp, 'Orders'):
         # no orders have changed
