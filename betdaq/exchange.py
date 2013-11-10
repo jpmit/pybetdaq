@@ -117,7 +117,8 @@ O_BACK = 1
 O_LAY = 2
 
 class Order(object):
-    """Returned after an order is placed."""
+    """Used to place an order, and returned after an order is placed."""
+    
     def __init__(self, sid, stake, price, polarity, **kwargs):
         """
         Create order from selection id, stake (in GBP), price (odds),
@@ -131,7 +132,7 @@ class Order(object):
 
         # the following are defaults and can be overridden by **kwargs
         self.status = O_NOTPLACED
-        # cancel when market goes 'in running'?        
+        # cancel when market goes 'in running'?
         self.cancelrunning = True
         # cancel if selection is reset?
         self.cancelreset = True
@@ -163,4 +164,3 @@ class Order(object):
 
     def __str__(self):
         return self.__repr__()
-
