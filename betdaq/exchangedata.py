@@ -33,14 +33,14 @@ MINODDSPLUS1 = 1.01
 # Allowed odds for BDAQ data
 # --------------------------
 # Increments below obtained from betdaq.com on 4th August 2013
-# 1 	   3 	   0.01
-# 3.05 	4 	   0.05
-# 4.1 	6 	   0.1
-# 6.2 	10 	0.2
-# 10.5 	20 	0.5
-# 21 	   50 	1
-# 52     200   2
-# 200    1000  5
+# 1     3     0.01
+# 3.05 	4     0.05
+# 4.1 	6     0.1
+# 6.2 	10    0.2
+# 10.5 	20    0.5
+# 21    50    1
+# 52    200   2
+# 200   1000  5
 
 def next_shorter_odds(odds):
     """Return odds one shorter (i.e. less in decimal) than odds."""
